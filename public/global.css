@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body{
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    background-color: #f9f9f9;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hide{
+    display: none !important;
+}
+
+canvas{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+#lang{
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 1vh 2vw;
+    background-color: #f9f9f9;
+    border-radius: 0 0 0 10px;
+}
+
+#back{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 1vh 3vw;
+    background-color: #f9f9f9;
+    border: 1px solid #aaa;
+    border-radius: 0 10px 0 0;
+    color: #000;
+    transition: background-color 0.3s ease;
+}
+#back:hover{
+    background-color: #eee;
+}
+
+.page{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+#login{
+    @apply select-none;
+    gap: 10vh;
+}
+
+#login > div.form{width: 70vw;}
+
+#app{
+    @apply overflow-y-auto gap-1 p-1;
+    justify-content: flex-start;
+}
+
+button, input, select, textarea{@apply rounded-md p-1 disabled:cursor-not-allowed disabled:opacity-50;}
+input, select, textarea{@apply bg-neutral-200 border border-neutral-300 hover:bg-neutral-300 focus:outline-none;}
+button{@apply cursor-pointer bg-neutral-950 hover:bg-neutral-900 border-none text-neutral-50;}
+button:disabled, input:disabled, select:disabled, textarea:disabled{@apply opacity-50 cursor-not-allowed;}
+
+::-webkit-scrollbar{width: 8px;}
+::-webkit-scrollbar-thumb{@apply bg-[#0002] hover:bg-[#0003] active:bg-[#0004] rounded-md;}
+::-webkit-scrollbar-track{background-color: transparent;}
+
+#app > section {@apply w-full flex flex-col items-center gap-1;}
+#app > section .log {@apply text-sm text-neutral-500;}
+#app > section div {@apply flex items-center gap-1;}
+#app > section > div > button{@apply w-full h-full;}
+#app > section > *, #app > section > details > *, #macro-list, #macros-list > main {@apply w-full;}
+#app > section > details, #macro-list, #macros-list {@apply flex flex-col;}
+#app > section > details > summary {@apply w-full hover:bg-neutral-300 cursor-pointer p-1 rounded-md flex justify-start items-center gap-1 select-none text-lg;}
+#app > section > details > summary > [type="checkbox"] {@apply text-base;}
+#app > section > details > summary:not(.no):before{content: "▶";}
+#app > section > details > summary.no:before{content: "●";}
+#app > section > details > summary:before{
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+#app > section > details[open] > summary::before{transform: rotate(90deg);}
+#app > section main {@apply flex items-center justify-between mb-0.5 gap-0.5;}
+#app > section > details > input {@apply w-20;}
+
+button#listen-sub.listening,
+button#listen-main.listening{@apply bg-sky-400 hover:bg-sky-500;}
+
+#app > section#console{@apply w-full h-full flex flex-col gap-1 overflow-hidden;}
+#console-out{
+    @apply flex flex-col items-center gap-1 overflow-y-auto w-full h-full bg-neutral-900 p-1 rounded-md;
+}
+#console-out > p{@apply w-full text-sm text-neutral-300 font-mono;}
+#console-input{
+    @apply bg-transparent hover:bg-transparent border-neutral-200 font-mono;
+    max-width: 75%;
+}
+
+#finder-out{@apply w-full h-full overflow-auto flex flex-col;}
+#finder-out .nicks{@apply flex flex-col;}
+#finder-out .nicks div{@apply w-full;}
+
+#finder-out details{@apply w-full;}
+#finder-out details summary{@apply w-full hover:bg-neutral-300 cursor-pointer p-1 rounded-md flex justify-start items-center gap-1 select-none text-lg;}
+#finder-out details summary:not([open]):before{content: "▶";}
+#finder-out details summary[open]:before{content: "▼";}
+
+.state{@apply rounded-full w-3 h-3 bg-neutral-400;}
+.state.active{@apply bg-sky-400;}
+.state.succeed{@apply bg-green-400;}
+.state.error{@apply bg-red-400;}
+.state.pending{@apply bg-yellow-400;}
+
+.keybind{@apply text-sm text-neutral-700 bg-neutral-100 text-center;}
+.keybind:not(.min){@apply w-24;}
+
+[type="checkbox"] {
+    appearance: none;
+    position: relative;
+    border: max(2px, 0.1em) solid gray;
+    border-radius: 1.25em;
+    width: 2.25em;
+    height: 1.25em;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    top: -0.03em;
+    left: 0;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    transform: scale(0.8);
+    background-color: gray;
+    transition: background-color 0.3s ease, left 0.3s ease;
+}
+
+[type="checkbox"]:checked {
+    background-color: skyblue;
+    border-color: skyblue;
+}
+
+[type="checkbox"]:checked::before {
+    background-color: white;
+    left: 1em;
+}
+  
+[type="checkbox"]:disabled {
+    border-color: lightgray;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+  
+[type="checkbox"]:disabled:before {
+    background-color: lightgray;
+}
+
+[type="checkbox"]:focus-visible {
+    outline-offset: max(2px, 0.1em);
+    outline: max(2px, 0.1em) solid skyblue;
+}

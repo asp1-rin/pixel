@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Controller</title>
+</head>
+<body>
+    <button id="request">Requset Permission</button>
+    <h1>Mobile Controller</h1>
+    <p id="alpha">Alpha : 0</p>
+    <p id="beta">Beta : 0</p>
+    <p id="gamma">Gamma : 0</p>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        let lastAlpha = 0;
+        let lastBeta = 0;
+        let lastGamma = 0;
+        const gyro = () => {
+            window.addEventListener('deviceorientation', function(event) {
+                let alpha = event.alpha;
+                let beta = event.beta;
+                let gamma = event.gamma;
+                let alphaDiff = alpha - lastAlpha;
+                alphaDiff > 180 && (alphaDiff = 360 - alphaDiff);
+                alphaDiff < -180 && (alphaDiff = 360 + alphaDiff);
+                let betaDiff = beta - lastBeta;
+                betaDiff > 180 && (betaDiff = 360 - betaDiff);
+                betaDiff < -180 && (betaDiff = 360 + betaDiff);
+                let gammaDiff = gamma - lastGamma;
+                gammaDiff > 90 && (gammaDiff = 180 - gammaDiff);
+                gammaDiff < -90 && (gammaDiff = 180 + gammaDiff);
+                lastAlpha = alpha;
+                lastBeta = beta;
+                lastGamma = gamma;
+                document.getElementById('alpha').innerText = `Alpha : ${alpha.toFixed(1)}`;
+                document.getElementById('beta').innerText = `Beta : ${beta.toFixed(1)}`;
+                document.getElementById('gamma').innerText = `Gamma : ${gamma.toFixed(1)}`;
+                socket.emit('gyro', { alpha:alphaDiff, beta:betaDiff, gamma:gammaDiff });
+            });
+        }
+        window.addEventListener('keydown', function(event) {
+            let key = event.key;
+            socket.emit('key', key);
+        });
+        document.getElementById('request').addEventListener('click', function() {
+            if(typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response == 'granted') {
+                            gyro();
+                        } else {
+                            alert('Permission denied');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                gyro();
+            }
+        });
+    </script>
+</body>
+</html>
