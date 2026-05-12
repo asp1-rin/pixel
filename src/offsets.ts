@@ -77,18 +77,12 @@ export const _anOffset = {
 
     "skill-base":   0x8BF075,
     "grenade-base": 0x8BEFC9,
-
-    // Sub-offset inside the cash struct used by the "change-ads-reward" hack.
-    // The value written there is in `_anPatch['ads-reward']` below.
-    "ads-reward":   0x58,
 } as const;
 
 // -----------------------------------------------------------------------------
 // 3a) Magic write values for AN-region patches (per-update like _xaPatch).
 // -----------------------------------------------------------------------------
-export const _anPatch = {
-    'ads-reward': 19,  // count written at cashBase + ads-reward to unlock the prize
-} as const;
+export const _anPatch = {} as const;
 
 // -----------------------------------------------------------------------------
 // 4) UserInfor (epos) struct field offsets
@@ -366,6 +360,24 @@ export const _symbols = {
     'assist.isAimAssist':                   "_ZNK9GameScene11IsAimAssistEv",
     'assist.AssistRequestInGameRoomUsers':  "_ZN16SystemPacketSend28AssistRequestInGameRoomUsersEv",
     'assist.SendAimAssistOption':           "_ZN16SystemPacketSend19SendAimAssistOptionEb",
+
+    // ---- Rewarded ads (Paradiso::AdManager + SystemPacketSend) ----
+    // Single-click ad-reward path: skip the actual ad playback by directly
+    // sending the shop-AD reward packet (and firing the in-client reward
+    // callback so any local UI / counter stays consistent).
+    'ad.adsRequestShopADReward':            "_ZN16SystemPacketSend22AdsRequestShopADRewardEh",
+    'ad.onRewarded':                        "_ZN8Paradiso9AdManager10OnRewardedEv",
+    // Always-on `IsAvailable*` bypasses for daily / per-ad limits.
+    'ad.isAvailableAds':                    "_ZNK8Paradiso9AdManager14IsAvailableAdsEv",
+    'ad.isAvailableCount':                  "_ZNK8Paradiso9AdManager16IsAvailableCountEv",
+    'ad.isAvailableTime':                   "_ZNK8Paradiso9AdManager15IsAvailableTimeEv",
+    'ad.isAvailableInitCycle':              "_ZNK8Paradiso9AdManager20IsAvailableInitCycleEv",
+    'ad.isAvailableShopADCount':            "_ZNK8Paradiso9AdManager22IsAvailableShopADCountEh",
+    'ad.isAvailableShopADTime':             "_ZNK8Paradiso9AdManager21IsAvailableShopADTimeEh",
+    'ad.isAvailableShopADInitCycle':        "_ZNK8Paradiso9AdManager26IsAvailableShopADInitCycleEh",
+    'ad.isAvailableCountBattleRoyal':       "_ZNK8Paradiso9AdManager27IsAvailableCountBattleRoyalEv",
+    'ad.isAvailableTimeBattleRoyal':        "_ZNK8Paradiso9AdManager26IsAvailableTimeBattleRoyalEv",
+    'ad.isAvailableInitCycleBattleRoyal':   "_ZNK8Paradiso9AdManager31IsAvailableInitCycleBattleRoyalEv",
 } as const;
 
 // Convenience type for consumers that don't care about the literal types

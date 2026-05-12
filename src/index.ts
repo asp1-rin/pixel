@@ -450,6 +450,7 @@ app.on("ready", async () => {
                                 ipcMain.on("unlock-all-item", (e, charid: number) => script.post(['unlock-all-item', charid]));
                                 ipcMain.on("unlock-all-char", (e) => script.post(['unlock-all-char']));
                                 ipcMain.on("get-daily-reward", (e, repeat: number) => script.post(['get-daily-reward', repeat]));
+                                ipcMain.on("change-ads-reward", (e) => script.post(['change-ads-reward']));
 
                                 ipcMain.on("kick-player", (e, number: number) => script.post(['kick-player', number]));
 

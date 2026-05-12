@@ -146,6 +146,8 @@ let unlockChar: any = null;
 let unlockAllChar: any = null;
 let buyClanGold: any = null;
 let getDailyReward: any = null;
+let adsRequestShopADReward: any = null;
+let onRewarded: any = null;
 let purchaseP: any = null;
 let purchaseT: any = null;
 let changeNickname: any = null;
@@ -370,6 +372,32 @@ function init(){
         };
         buyClanGold = makeNFunc(agentSyms['buy.buyWithClanGold'], 'void', ['uchar']);
         getDailyReward = makeNFunc(agentSyms['global.sendReqDailyBonus'], 'void', ['uchar']);
+        adsRequestShopADReward = makeNFunc(agentSyms['ad.adsRequestShopADReward'], 'void', ['uchar']);
+        onRewarded = makeNFunc(agentSyms['ad.onRewarded'], 'void', []);
+
+        // Always-on bypass for the in-client daily/per-ad limit checks. The
+        // server still enforces what it enforces, but the client UI stops
+        // gating buttons after the local "you've watched N ads today" / "wait
+        // M seconds" counters expire. forceTrue keeps the original args/regs
+        // untouched and only overwrites the boolean return on the way out.
+        const forceTrue = (sym: string) => {
+            const addr = Module.findExportByName(libName, sym);
+            if(!addr) {
+                console.log("[ad-limit-bypass] missing symbol:", sym);
+                return;
+            }
+            Interceptor.attach(addr, { onLeave(retval) { retval.replace(ptr(1)); } });
+        };
+        forceTrue(agentSyms['ad.isAvailableAds']);
+        forceTrue(agentSyms['ad.isAvailableCount']);
+        forceTrue(agentSyms['ad.isAvailableTime']);
+        forceTrue(agentSyms['ad.isAvailableInitCycle']);
+        forceTrue(agentSyms['ad.isAvailableShopADCount']);
+        forceTrue(agentSyms['ad.isAvailableShopADTime']);
+        forceTrue(agentSyms['ad.isAvailableShopADInitCycle']);
+        forceTrue(agentSyms['ad.isAvailableCountBattleRoyal']);
+        forceTrue(agentSyms['ad.isAvailableTimeBattleRoyal']);
+        forceTrue(agentSyms['ad.isAvailableInitCycleBattleRoyal']);
         purchaseP = makeNFunc(agentSyms['global.sendPurchasePass'], 'void', ['uint', 'uchar']);
         purchaseT = makeNFunc(agentSyms['global.sendPurchasePassTier'], 'void', ['uint', 'uchar']);
         changeNickname = (name:string) => {
@@ -642,10 +670,17 @@ function init(){
                 } else if(name === 'skillcode'){
                     skillcode(+args[0]);
                 } else if(name === 'change-ads-reward'){
-                    if(!an) return recv(api);
-                    if(an.isNull()) return recv(api);
-                    const cashBase = an.add(anOffset['cash-base']);
-                    cashBase.add(anOffset['ads-reward']).writeS32(anPatch['ads-reward']);
+                    // Single-tap ad reward: directly send the shop-AD reward
+                    // packet for every shop slot (so the user gets all
+                    // available rewards in one click) and fire the local
+                    // OnRewarded callback so the in-client UI updates.
+                    if(!adsRequestShopADReward) return recv(api);
+                    for(let slot = 0; slot < 20; slot++){
+                        try { adsRequestShopADReward(slot); } catch(_) {}
+                    }
+                    if(onRewarded){
+                        try { onRewarded(); } catch(_) {}
+                    }
                 } else if(name === 'change-NaN'){
                     beNaN();
                 } else if(name === 'match-win'){ if(!epos) return recv(api);
