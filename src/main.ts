@@ -1567,7 +1567,7 @@ ipcRenderer.on('skillcode', (e, code:number) => {
 // })
 
 $_('change-NaN').addEventListener('click', () => {ipcRenderer.send('change-NaN');});
-// $_('change-ads-reward').addEventListener('click', () => {ipcRenderer.send('change-ads-reward');});
+$_('change-ads-reward').addEventListener('click', () => {ipcRenderer.send('change-ads-reward');});
 
 const blurCurrent = () => {(document.activeElement as HTMLInputElement).blur();}
 const changePosition = () => {ipcRenderer.send('pos', [parseFloat(xel.value || "0"), parseFloat(yel.value || "0"), parseFloat(zel.value || "0")]);}
