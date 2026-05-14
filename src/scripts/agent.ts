@@ -161,6 +161,11 @@ let mago: any = null;
 
 const log = (...args:any[]) => send(['log', ...args]);
 
+// Matches the sentinel emitted by `Commander.call` when --silent/-s/--no-log
+// is passed. Strips the return-value log so high-frequency native calls (e.g.
+// scripted in a tight macro loop) don't flood the host devtools.
+const silentCallSentinel = '__pixel_silent__';
+
 let found: boolean = false;
 const loadModule = setInterval(() => {
     try {
@@ -581,8 +586,14 @@ function init(){
                         case 'no-recoil':       applyXaPatch('no-recoil',       !!args[1]); break;
                         case 'no-clip':         applyXaPatch('no-clip',         !!args[1]); break;
                         case 'no-spread':
-                            applyXaPatch('no-spread1', !!args[1]);
-                            applyXaPatch('no-spread2', !!args[1]);
+                            applyXaPatch('no-spread1',          !!args[1]);
+                            applyXaPatch('no-spread2',          !!args[1]);
+                            applyXaPatch('no-spread-idle',       !!args[1]);
+                            applyXaPatch('no-spread-idle-zoom',  !!args[1]);
+                            applyXaPatch('no-spread-jump',       !!args[1]);
+                            applyXaPatch('no-spread-jump-zoom',  !!args[1]);
+                            applyXaPatch('no-spread-move-zoom',  !!args[1]);
+                            applyXaPatch('no-spread-shoot-zoom', !!args[1]);
                             break;
                         case 'no-reload':       applyXaPatch('no-reload',       !!args[1]); break;
                         case 'instant-respawn': applyXaPatch('instant-respawn', !!args[1]); break;
@@ -769,7 +780,9 @@ function init(){
                 } else if(name === "unhook"){
                     cmdUnhookAll();
                 } else if(name === "call"){
-                    cmdCallF(args[0], ...args.slice(1));
+                    const silentLog = args[1] === silentCallSentinel;
+                    const callArgs = silentLog ? args.slice(2) : args.slice(1);
+                    cmdCallF(args[0], { silentLog }, ...callArgs);
                 } else if(name === "read"){
                     cmdReadF(args[0], args[1]);
                 } else if(name === "write"){
@@ -2390,7 +2403,7 @@ function argMap(arg:string): string {
         default: return "pointer";
     }
 }
-function cmdCallF(str:string, ...args:any[]):any{
+function cmdCallF(str:string, options: { silentLog?: boolean } = {}, ...args:any[]):any{
     try {
         const demangled = demangle(str);
         const f = new NativeFunction(
@@ -2421,11 +2434,11 @@ function cmdCallF(str:string, ...args:any[]):any{
             }
         }).filter(arg => arg !== null);
         const ret = (f as any)(...args);
-        log(ret);
+        if(!options.silentLog) log(ret);
         return ret;
     } catch (error) {
         console.error(error);
-        log(error);
+        if(!options.silentLog) log(error);
     }
 }
 function cmdArg(arg: string, args: NativePointer): string {
