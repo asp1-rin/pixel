@@ -127,21 +127,12 @@ let devPerf: boolean = false;
 let perfAccum = 0;
 let perfCount = 0;
 let perfLast = Date.now();
-let autoEnd = false;
 
 // let activeTouches: Record<string, any> = {}
 // let InputManager:any = null;
 
 let setYaw: any = null;
 let setPitch: any = null;
-let endgame: any = null;
-let setDia: any = null;
-let setGold: any = null;
-let setXp: any = null;
-let setClanXp: any = null;
-let setSLCoin: any = null;
-let setSLPoint: any = null;
-let unlockSLMedal: any = null;
 let unlockChar: any = null;
 let unlockAllChar: any = null;
 let buyClanGold: any = null;
@@ -352,18 +343,6 @@ function init(){
         const item = makeNFunc(agentSyms['buy.buyItem'], 'void', ['uchar', 'uchar', 'uchar', 'uchar']);
         setYaw = makeNFunc(agentSyms['camera.setCameraAngleX'], 'void', ['float']);
         setPitch = makeNFunc(agentSyms['camera.setCameraAngleY'], 'void', ['float']);
-        endgame = makeNFunc(agentSyms['cheat.forceEndGame'], 'void', ['pointer']);
-        setDia = (amount: number) => makeNFunc(agentSyms['cheat.setMoney'], 'void', ['int', 'int'])(amount, 0);
-        setGold = (amount: number) => makeNFunc(agentSyms['cheat.setGold'], 'void', ['int', 'int'])(amount, 0);
-        setXp = (amount: number) => makeNFunc(agentSyms['cheat.setGradeAndPoint'], 'void', ['uchar', 'uint'])(1, amount);
-        setClanXp = makeNFunc(agentSyms['cheat.setClanExp'], 'void', ['uint']);
-        setSLCoin = makeNFunc(agentSyms['cheat.setStarLeagueCoin'], 'void', ['uint']);
-        setSLPoint = makeNFunc(agentSyms['cheat.setStarLeaguePoint'], 'void', ['uint16']);
-        unlockSLMedal = () => {
-            for(let i = 1; i <= 12; i++){
-                makeNFunc(agentSyms['cheat.getStarLeagueMedal'], 'void', ['uchar', 'ulong'])(i, 4);
-            }
-        }
         unlockChar = (charId: number) => {
             for(let i = 1; i <= 255; i++){item(charId, 0, i, 1)}
             for(let i = 1; i <= 255; i++){item(charId, 1, i, 1)}
@@ -436,17 +415,6 @@ function init(){
                     let ts = ptr(retval.toString());
                     if(ts && !ts.isNull()){
                         if(ts.readS32() === +config['epos-number']){
-                            if(autoEnd && epos.toString() !== ts.toString()) {
-                                const endType = config['auto-end-type'] || '0';
-                                if(endType === '0'){
-                                    endgame(ptr(ts.add(eposOffset['slot']).readU8() % 2));
-                                } else if(endType === '1'){
-                                    endgame(ptr(1 - (ts.add(eposOffset['slot']).readU8() % 2)));
-                                } else if(endType === '2'){
-                                    endgame(ptr(3));
-                                }
-                                autoEnd = false;
-                            }
                             epos = ts;
                         } else if (
                             epos.readS32() !== +config['epos-number']
@@ -465,11 +433,7 @@ function init(){
                     let ts = ptr(retval.toString());
                     if(ts && !ts.isNull()){
                         saveWPData(ts);
-                        if(ts.toString() === epos.toString()){
-                            if(cheats['skill-cooldown']){
-                                makeNFunc(agentSyms['cheat.setAllSkillCoolTimeOneSecond'], 'void', ['bool'])(1);
-                            }
-                        } else {
+                        if(ts.toString() !== epos.toString()){
                             entityList.add(ts.toString());
                             entityList.forEach(p => {
                                 try{
@@ -505,11 +469,6 @@ function init(){
                 }
             },
         });
-        attachNFunc(agentSyms['ingame.getMaxSkill'],     {onLeave: retval => {if(cheats['skill-cooldown']) retval.replace(12 as any)}})
-        attachNFunc(agentSyms['ingame.getCurSkill'],     {onLeave: retval => {if(cheats['skill-cooldown']) retval.replace(12 as any)}})
-        attachNFunc(agentSyms['ingame.isSkillManyTimes'],{onLeave: retval => {if(cheats['skill-cooldown']) retval.replace(1 as any)}})
-        attachNFunc(agentSyms['cloud.getSkillTime'],     {onLeave: retval => {if(cheats['skill-cooldown']) retval.writeFloat(1)}})
-        attachNFunc(agentSyms['ingame.gameSceneInit'],   {onLeave: () => cheats['auto-end'] && (autoEnd = true)})
         const stateLoop = setInterval(() => {
             if(epos && !epos.isNull()) {
                 send(['epos-state', 'succeed', epos.toString()]);
@@ -699,22 +658,6 @@ function init(){
                     }
                 } else if(name === 'change-NaN'){
                     beNaN();
-                } else if(name === 'match-win'){ if(!epos) return recv(api);
-                    if(epos.isNull()) return recv(api);
-                    endgame(ptr(epos.add(eposOffset['slot']).readU8() % 2));
-                } else if(name === 'match-lose'){ if(!epos) return recv(api);
-                    if(epos.isNull()) return recv(api);
-                    endgame(ptr(1 - epos.add(eposOffset['slot']).readU8() % 2));
-                } else if(name === 'match-draw'){ endgame(ptr(3));
-                } else if(name === 'match-milk'){ endgame(ptr(0));
-                } else if(name === 'match-choco'){ endgame(ptr(1));
-                } else if(name === 'receive-dia'){ setDia(+args[0] || 0);
-                } else if(name === 'receive-gold'){ setGold(+args[0] || 0);
-                } else if(name === 'receive-xp'){ setXp(+args[0] || 0);
-                } else if(name === 'receive-clan-xp'){ setClanXp(+args[0] || 0);
-                } else if(name === 'receive-sl-coin'){ setSLCoin(+args[0] || 0);
-                } else if(name === 'receive-sl-point'){ setSLPoint(+args[0] || 0);
-                } else if(name === 'unlock-sl-medal'){ unlockSLMedal();
                 } else if(name === 'unlock-all-item'){ unlockChar(+args[0] || 0);
                 } else if(name === 'unlock-all-char'){ unlockAllChar();
                 } else if(name === 'buy-clan-gold'){ 
@@ -1186,9 +1129,6 @@ function loop(){
             // lastEpos = false;
             // clearAll();
         }
-        // if(cheats['skill-cooldown']){
-        //     an.add(anOffset['skill-base']).writeS8(1);
-        // }
         if(devPerf){
             perfAccum += delta;
             perfCount += 1;

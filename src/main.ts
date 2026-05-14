@@ -693,12 +693,6 @@ const lan:{[key:string]:{[key:string]:string}} = {
         'ja':'リスポーンタイマーなし',
         'zh':'无重生计时器',
     },
-    'skill-cooldown':{
-        'en':'Skill Cooldown',
-        'ko':'스킬 쿨타임',
-        'ja':'スキルクールダウン',
-        'zh':'技能冷却',
-    },
     'instant-respawn':{
         'en':'Instant Respawn',
         'ko':'즉시 부활',
@@ -897,18 +891,6 @@ const lan:{[key:string]:{[key:string]:string}} = {
         'ja':'マゴ',
         'zh':'马戈',
     },
-    'auto-end':{
-        'en':'Auto End',
-        'ko':'자동 종료',
-        'ja':'自動終了',
-        'zh':'自动结束',
-    },
-    'auto-end-type':{
-        'en':'Auto End Type',
-        'ko':'자동 종료 타입',
-        'ja':'自動終了タイプ',
-        'zh':'自动结束类型',
-    },
     'cooker-buff':{
         'en':'Cooker Buff',
         'ko':'쿠커 버프',
@@ -951,101 +933,11 @@ const lan:{[key:string]:{[key:string]:string}} = {
         'ja':'広告報酬変更',
         'zh':'更改广告奖励',
     },
-    'match-maker':{
-        'en':'Match Maker',
-        'ko':'매치 메이커',
-        'ja':'マッチメイカー',
-        'zh':'匹配器'
-    },
-    'match-end':{
-        'en':'Match End',
-        'ko':'매치 종료',
-        'ja':'マッチ終了',
-        'zh':'比赛结束'
-    },
-    'win':{
-        'en':'Win',
-        'ko':'승리',
-        'ja':'勝利',
-        'zh':'胜利'
-    },
-    'lose':{
-        'en':'Lose',
-        'ko':'패배',
-        'ja':'敗北',
-        'zh':'失败'
-    },
-    'draw':{
-        'en':'Draw',
-        'ko':'무승부',
-        'ja':'引き分け',
-        'zh':'平局'
-    },
-    'milk-win':{
-        'en':'Milk Win',
-        'ko':'밀크 승리',
-        'ja':'ミルク優勝',
-        'zh':'牛奶获胜'
-    },
-    'choco-win':{
-        'en':'Choco Win',
-        'ko':'초코 승리',
-        'ja':'チョコレート優勝',
-        'zh':'巧克力获胜'
-    },
     'resource-hack':{
         'en':'Resource Hack',
         'ko':'자원 핵',
         'ja':'リソースハック',
         'zh':'资源黑客',
-    },
-    'dia': {
-        'en':'Diamond',
-        'ko':'다이아',
-        'ja':'ダイヤ',
-        'zh':'钻石',
-    },
-    'gold': {
-        'en':'Gold',
-        'ko':'골드',
-        'ja':'ゴールド',
-        'zh':'金币',
-    },
-    'xp': {
-        'en':'XP',
-        'ko':'경험치',
-        'ja':'経験値',
-        'zh':'经验值',
-    },
-    'clan-xp': {
-        'en':'Clan XP',
-        'ko':'클랜 경험치',
-        'ja':'クラン経験値',
-        'zh':'公会经验值',
-    },
-    'sl-coin': {
-        'en':'SL Coin',
-        'ko':'슽리 코인',
-        'ja':'SLコイン',
-        'zh':'SL币',
-    },
-    'sl-point': {
-        'en':'SL Point',
-        'ko':'슽리 포인트',
-        'ja':'SLポイント',
-        'zh':'SL点',
-    },
-    'receive': {
-        'en':'Receive',
-        'ko':'수령',
-        'ja':'受け取り',
-        'zh':'接收',
-    },
-    'unlock-sl-medal': {
-        'en':'Unlock SL Medal',
-        'ko':'슽리 메달 해금',
-        'ja':'SLメダルロック解除',
-        'zh':'解锁SL勋章',
     },
     'unlock-all-item': {
         'en':'Unlock All Item',
@@ -1632,18 +1524,6 @@ sel.addEventListener('change', blurCurrent);
 // $_('scan-entity').addEventListener('click', () => {ipcRenderer.send('scan-entity');});
 // $_('clear-all').addEventListener('click', () => {ipcRenderer.send('clear-all');});
 
-$_('match-win').addEventListener('click', () => {ipcRenderer.send('match-win');});
-$_('match-lose').addEventListener('click', () => {ipcRenderer.send('match-lose');});
-$_('match-draw').addEventListener('click', () => {ipcRenderer.send('match-draw');});
-$_('match-milk').addEventListener('click', () => {ipcRenderer.send('match-milk');});
-$_('match-choco').addEventListener('click', () => {ipcRenderer.send('match-choco');});
-$_('receive-dia').addEventListener('click', () => {ipcRenderer.send('receive-dia', parseInt($i('resource-hack-dia').value) || 0);});
-$_('receive-gold').addEventListener('click', () => {ipcRenderer.send('receive-gold', parseInt($i('resource-hack-gold').value) || 0);});
-$_('receive-xp').addEventListener('click', () => {ipcRenderer.send('receive-xp', parseInt($i('resource-hack-xp').value) || 0);});
-$_('receive-clan-xp').addEventListener('click', () => {ipcRenderer.send('receive-clan-xp', parseInt($i('resource-hack-clan-xp').value) || 0);});
-$_('receive-sl-coin').addEventListener('click', () => {ipcRenderer.send('receive-sl-coin', parseInt($i('resource-hack-sl-coin').value) || 0);});
-$_('receive-sl-point').addEventListener('click', () => {ipcRenderer.send('receive-sl-point', parseInt($i('resource-hack-sl-point').value) || 0);});
-$_('unlock-sl-medal').addEventListener('click', () => {ipcRenderer.send('unlock-sl-medal');});
 $_('unlock-all-item').addEventListener('click', () => {ipcRenderer.send('unlock-all-item', parseInt($i('unlock-all-item-char-id').value) || 0);});
 $_('unlock-all-char').addEventListener('click', () => {ipcRenderer.send('unlock-all-char');});
 $_('get-daily-reward').addEventListener('click', () => {ipcRenderer.send('get-daily-reward', parseInt($i('get-daily-reward-repeat').value) || 1);});
