@@ -1,0 +1,46 @@
+name: Build Windows EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Typescript
+        run: npm run build
+
+      - name: Set EXE Icon
+        shell: powershell
+        run: |
+          $package = Get-Content package.json -Raw | ConvertFrom-Json
+          $package.build.win.icon = "./public/favicon.ico"
+          $package | ConvertTo-Json -Depth 100 | Set-Content package.json
+
+      - name: Build Windows EXE
+        run: npm run dist
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
