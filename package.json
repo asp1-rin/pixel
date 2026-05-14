@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder",
+    "dist": "electron-builder --publish never",
     "watch": "concurrently \"tsc -w\" \"npx tailwindcss -i ./public/global.css -o ./public/output.css --watch\" \"tsc -w --project tsconfig.scripts.json\"",
     "build": "tsc && npx tailwindcss -i ./public/global.css -o ./public/output.css --minify && tsc --project tsconfig.scripts.json && node scripts/inject-offsets.cjs",
     "inject-offsets": "node scripts/inject-offsets.cjs",
