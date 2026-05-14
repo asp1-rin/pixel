@@ -5,12 +5,13 @@ import dotenv from "dotenv";
 import path from "path";
 
 import { createWindow } from "./data/utils";
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { autoUpdater } from "electron-updater";
 import isDev from "electron-is-dev";
 import frida from "frida";
 import { existsSync, readFileSync } from "fs";
 import { adb, attachProcess, checkFridaPerm, connectFrida, connectAdbDevice, executeProcess, fileExist, fileName, getArch, getUrl, startFrida } from "./data/frida";
+import { loginPixel, defaultWebUrl } from "./data/auth";
 import { exec } from "child_process";
 import { createServer as createPixelServer } from "./core/server";
 import type { ServerFacade } from "./core/server";
@@ -156,17 +157,40 @@ app.on("ready", async () => {
         exitApp();
     });
 
+    const sendPostUpdate = () => {
+        if(main.isDestroyed()) return;
+        const bypass = process.env.PIXEL_DEV_BYPASS_AUTH === 'true';
+        main.webContents.send(bypass ? "enter" : "updater-done");
+    };
+
     autoUpdater.on("error", (err) => {
         Logger.error("Update error", err);
-        main.webContents.send("enter");
+        sendPostUpdate();
     });
 
     autoUpdater.on("update-cancelled", () => {
-        main.webContents.send("enter");
+        sendPostUpdate();
     });
 
     autoUpdater.on("update-not-available", () => {
-        main.webContents.send("enter");
+        sendPostUpdate();
+    });
+
+    // pixel-code-web authentication
+    ipcMain.handle("auth:login", async (_e, payload: { id?: string; password?: string }) => {
+        try {
+            const id = (payload?.id || '').trim();
+            const password = payload?.password || '';
+            if(!id || !password) return { ok: false, error: 'ID / Password required' };
+            return await loginPixel(id, password);
+        } catch (err:any) {
+            Logger.error("auth:login error", err);
+            return { ok: false, error: err?.message || 'login error' };
+        }
+    });
+    ipcMain.on("open-web", () => {
+        const url = process.env.PIXEL_WEB_URL || defaultWebUrl;
+        shell.openExternal(url).catch(err => Logger.error("openExternal error", err));
     });
 
     // web server (create after windows + state function exist)
