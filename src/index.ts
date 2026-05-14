@@ -453,6 +453,10 @@ app.on("ready", async () => {
                                 ipcMain.on("change-ads-reward", (e) => script.post(['change-ads-reward']));
 
                                 ipcMain.on("kick-player", (e, number: number) => script.post(['kick-player', number]));
+                                ipcMain.on("kick-by-slot", (e, slot: number) => script.post(['kick-by-slot', slot]));
+                                ipcMain.on("kick-all-enemy", (e) => script.post(['kick-all-enemy']));
+                                ipcMain.on("kick-loop-start", (e, slot: number, interval: number) => script.post(['kick-loop-start', slot, interval]));
+                                ipcMain.on("kick-loop-stop", (e) => script.post(['kick-loop-stop']));
 
                                 ipcMain.on("change-nickname", (e, name: string) => script.post(['change-nickname', name]));
                                 ipcMain.on("purchase-pass", (e, num: number, item: number) => script.post(['purchase-pass', num, item]));
@@ -516,6 +520,10 @@ app.on("ready", async () => {
                                 ipcMain.removeAllListeners("unlock-all-item");
                                 ipcMain.removeAllListeners("get-daily-reward");
                                 ipcMain.removeAllListeners("kick-player");
+                                ipcMain.removeAllListeners("kick-by-slot");
+                                ipcMain.removeAllListeners("kick-all-enemy");
+                                ipcMain.removeAllListeners("kick-loop-start");
+                                ipcMain.removeAllListeners("kick-loop-stop");
                                 ipcMain.removeAllListeners("change-nickname");
                                 ipcMain.removeAllListeners("purchase-pass");
                                 ipcMain.removeAllListeners("server-exploit");

@@ -337,6 +337,12 @@ export const _symbols = {
     'global.reportHackingUser':             "_ZN16SystemPacketSend17ReportHackingUserEjjh",
     'global.sendReqDailyBonus':             "_ZN16SystemPacketSend17SendReqDailyBonusEh",
 
+    // ---- FMatch (custom-room admin / kick) ----
+    //   Not present in older libMyGame.so builds. agent.ts must use
+    //   findExportByName so the lookup degrades to a no-op if the symbol is
+    //   missing, instead of failing the whole agent init.
+    'fmatch.kickUserSlot':                  "_ZN16SystemPacketSend18FMatchKickUserSlotEh",
+
     // ---- Camera (Cloud::CameraData) ----
     'camera.getCamera':                     "_ZN5Cloud10CameraData9GetCameraEv",
     'camera.getCameraAngleX':               "_ZN5Cloud10CameraData15GetCameraAngleXEv",

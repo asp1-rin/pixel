@@ -159,6 +159,10 @@ let equip: any = null;
 let elec: any = null;
 let mago: any = null;
 
+// Direct kick via SystemPacketSend::FMatchKickUserSlot. May be null on older
+// libMyGame.so builds that don't export the symbol — every call site guards.
+let fMatchKickUserSlot: any = null;
+
 const log = (...args:any[]) => send(['log', ...args]);
 
 // Matches the sentinel emitted by `Commander.call` when --silent/-s/--no-log
@@ -425,6 +429,7 @@ function init(){
         equip = makeNFunc(agentSyms['buy.equipShort'], 'void', ['uchar', 'uchar', 'uint16']);
         elec = makeNFunc(agentSyms['ingame.buffHitElectric'], 'void', ['pointer', 'uint', 'uint']);
         mago = makeNFunc(agentSyms['ingame.debuffSkillMagoTotem'], 'void', ['uint', 'uint']);
+        fMatchKickUserSlot = makeNFunc(agentSyms['fmatch.kickUserSlot'], 'void', ['uchar']);
         attachNFunc(agentSyms['camera.getCameraUser'], {
             onLeave(retval) {
                 if(config['epos-number'] && config['epos-number'] != '0'){
@@ -724,6 +729,23 @@ function init(){
                         getDailyReward(1);
                     }
                 } else if(name === 'kick-player'){ purchaseT(+args[0] || 0, 0);
+                } else if(name === 'kick-by-slot'){
+                    if(!fMatchKickUserSlot) return recv(api);
+                    try { fMatchKickUserSlot(+args[0] || 0); } catch(_){}
+                } else if(name === 'kick-all-enemy'){
+                    if(!fMatchKickUserSlot) return recv(api);
+                    if(!epos || epos.isNull()) return recv(api);
+                    const myteam = epos.add(eposOffset['slot']).readU8() % 2;
+                    [...entityList].forEach(p => {
+                        try{
+                            const pt = ptr(p);
+                            if(pt.add(eposOffset['number']).readS32() <= 0) return;
+                            const slot = pt.add(eposOffset['slot']).readU8();
+                            if(slot % 2 !== myteam) fMatchKickUserSlot(slot);
+                        }catch(_){}
+                    });
+                } else if(name === 'kick-loop-start'){ kickLoopStart(+args[0] || 0, +args[1] || 200);
+                } else if(name === 'kick-loop-stop'){ kickLoopStop();
                 } else if(name === 'change-nickname'){ changeNickname(args[0] || 'no name');
                 } else if(name === 'purchase-pass'){ purchaseP(+args[0] || 0, +args[1] || 0);
                 } else if(name === 'server-exploit'){ exploitServer();
@@ -2074,6 +2096,27 @@ rpc.exports = {
         return Process.enumerateModules();
     }
 }
+let kickLoopInterval: ReturnType<typeof setInterval> | null = null;
+function kickLoopStart(slot: number, interval: number){
+    kickLoopStop();
+    if(!fMatchKickUserSlot) {
+        send(['kick-loop', 'unavailable']);
+        return;
+    }
+    kickLoopInterval = setInterval(() => {
+        if(!epos || epos.isNull()) return;
+        try { fMatchKickUserSlot(slot); } catch(_){}
+    }, interval);
+    send(['kick-loop', 'started', slot]);
+}
+function kickLoopStop(){
+    if(kickLoopInterval){
+        clearInterval(kickLoopInterval);
+        kickLoopInterval = null;
+    }
+    send(['kick-loop', 'stopped']);
+}
+
 function genRandom(length: number = 9): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
