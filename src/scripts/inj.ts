@@ -20,9 +20,7 @@ const inj_defaultConfig = {
     nr: true,
     us: true,
     mv: false,
-    skc: true,
     ld: false,
-    win: false,
     kick: false,
     ccl: 0,
     // static
@@ -84,23 +82,6 @@ function injApplyXaPatch(name: string, on: boolean){
 //  centralized table in src/offsets.ts). Args are kept inline because they
 //  describe the calling convention, which doesn't change with game updates.
 // -----------------------------------------------------------------------------
-const cheatOffsets: Record<string, OffsetInfo> = {
-    setClanExp:                   O('cheat.setClanExp',                   ["uint"]),
-    forceEndGame:                 O('cheat.forceEndGame',                 ["pointer"]),
-    disconnectGameServer:         O('cheat.disconnectGameServer',         ["uchar"]),
-    setLatency:                   O('cheat.setLatency',                   ["uint"]),
-    setStarLeaguePoint:           O('cheat.setStarLeaguePoint',           ["uint16"]),
-    getStarLeagueReward:          O('cheat.getStarLeagueReward',          []),
-    setStarLeagueCoin:            O('cheat.setStarLeagueCoin',            ["uint"]),
-    setGradeAndPoint:             O('cheat.setGradeAndPoint',             ["uchar", "uint"]),
-    setPoint:                     O('cheat.setPoint',                     ["uchar", "uint"]),
-    setGold:                      O('cheat.setGold',                      ["int", "int"]),
-    setBMoney:                    O('cheat.setBMoney',                    ["int", "int"]),
-    setMoney:                     O('cheat.setMoney',                     ["int", "int"]),
-    setAllSkillCoolTimeOneSecond: O('cheat.setAllSkillCoolTimeOneSecond', ["bool"]),
-    getStarLeagueMedal:           O('cheat.getStarLeagueMedal',           ["uchar", "ulong"]),
-};
-
 const buyOffsets: Record<string, OffsetInfo> = {
     buyWithGold:            O('buy.buyWithGold',            ["uchar"]),
     buyCharacter:           O('buy.buyCharacter',           ["uchar"]),
@@ -414,9 +395,7 @@ class Ch{
     nr:boolean = inj_defaultConfig.nr;
     us:boolean = inj_defaultConfig.us;
     mv:boolean = inj_defaultConfig.mv;
-    skc:boolean = inj_defaultConfig.skc;
     ld:boolean = inj_defaultConfig.ld;
-    win:boolean = inj_defaultConfig.win;
     kick:boolean = inj_defaultConfig.kick;
     ccl:number = inj_defaultConfig.ccl;
     _clip:boolean = true;
@@ -466,13 +445,12 @@ class Ch{
 
 let ch = new Ch(inj_defaultConfig.clip, inj_defaultConfig.onek, inj_defaultConfig.onesk, inj_defaultConfig.resp)
 let players:Set<string> = new Set();
-let dia: any, gold: any, xp: any, slcoin: any, slmedal: any, slpoint: any, point: any, skill: any, clan: any, win: any, boom: any,
-    eq: any, item: any, char: any, unlock: any, del:any, cg: any, medal: any,
+let eq: any, item: any, char: any, unlock: any, del:any, cg: any, medal: any,
     clancr: any, clandel: any, clanlv: any, clandesc: any, clanacc: any, claninv: any, clangrade: any, clankick: any,
     clmtcr: any, clmtst: any,
     chat: any, nick: any,
     purp: any, purt: any, puri: any, kb: any, kick: any,
-    ex: any, unlockAll: any;
+    unlockAll: any;
 const ls = () => {
     Array.from(players).forEach(str => {
         const pt = ptr(str);
@@ -489,17 +467,6 @@ const inj_main = async () => {
     if(modl.isNull()) return console.log("[!] No Module Found.");
 
     console.log("[*] Initialized - Pixel Injection CLI v2.3", `(LibMyGame: ${modl}), PID: ${Process.getCurrentThreadId()}, Arch: ${Process.arch}`);
-    dia = (amount:number) => func(cheatOffsets.setMoney)(amount, 0);
-    gold = (amount:number) => func(cheatOffsets.setGold)(amount, 0);
-    xp = (amount: number) => func(cheatOffsets.setGradeAndPoint)(1, amount);
-    slcoin = func(cheatOffsets.setStarLeagueCoin);
-    slmedal = func(cheatOffsets.getStarLeagueMedal);
-    slpoint = func(cheatOffsets.setStarLeaguePoint);
-    point = (char:number, amount:number) => func(cheatOffsets.setPoint)(char, amount);
-    skill = func(cheatOffsets.setAllSkillCoolTimeOneSecond);
-    clan = func(cheatOffsets.setClanExp);
-    win = (team:number) => func(cheatOffsets.forceEndGame)(ptr(team));
-    boom = (uchar:number) => func(cheatOffsets.disconnectGameServer)(uchar);
     eq = func(buyOffsets.equip);
     item = func(buyOffsets.buyItem);
     char = func(buyOffsets.buyCharacter);
@@ -561,14 +528,6 @@ const inj_main = async () => {
         pt.add(0x8).writeFloat(z);
         func(globalOffsets.sendKnockBack)(id, pt);
     }
-    ex = () => {
-        dia(15_9999_9999)
-        gold(15_9999_9999)
-        slcoin(15_9999_9999)
-        for(let i = 1; i <= 12; i++){
-            slmedal(i, 4)
-        }
-    }
     unlockAll = () => {
         for(let i = 2; i <= 27; i++){char(i)}
         for(let i = 1; i <= 27; i++){unlock(i)}
@@ -594,19 +553,6 @@ const inj_main = async () => {
                 const cmd = str.split(' ')[0].substring(1).toLowerCase();
                 const args = str.split(' ').slice(1);
                 switch (cmd) {
-                    case 'w':
-                        if(ch.me && ptr(ch.me) && !ptr(ch.me).isNull()){
-                            win(ptr(ch.me).add(eposOffsets.slot).readU8() % 2);
-                        }
-                        break;
-                    case 'l':
-                        if(ch.me && ptr(ch.me) && !ptr(ch.me).isNull()){
-                            win(1 - (ptr(ch.me).add(eposOffsets.slot).readU8() % 2));
-                        }
-                        break;
-                    case 'd':
-                        win(3);
-                        break;
                     case 'cc':
                         clancr();
                         setTimeout(() => {
@@ -626,11 +572,6 @@ const inj_main = async () => {
             }
         }
     })
-
-    intercept(inGameOffsets.getMaxSkill, {onLeave: retval => {if(ch.skc) retval.replace(12 as any)}})
-    intercept(inGameOffsets.getCurSkill, {onLeave: retval => {if(ch.skc) retval.replace(12 as any)}})
-    intercept(inGameOffsets.isSkillManyTimes, {onLeave: retval => {if(ch.skc) retval.replace(1 as any)}})
-    intercept(cloudOffsets.getSkillTime, {onLeave: retval => {if(ch.skc) retval.writeFloat(1)}})
 
     intercept(clanOffsets.clanCreate, {onLeave(retval) {if(ch.ccl){setTimeout(clandel, 400);}}})
     intercept(clanOffsets.clanBreakup, {onLeave(retval) {if(ch.ccl){ch.ccl--;setTimeout(clancr, 100);}}})
@@ -672,7 +613,6 @@ const inj_main = async () => {
         let mynum = mypt.readS32();
         let slot = mypt.add(eposOffsets.slot).readU8();
         // func(globalOffsets.resetPacketReceive)();
-        // func(cheatOffsets.setLatency)(0);
         func(globalOffsets.toggleAbuseDetector)(0);
         if(ch.bf){
             func(inGameOffsets.buffOnWheelleg)(mypt);
@@ -772,9 +712,7 @@ const inj_main = async () => {
                 try{
                     const pt = ptr(player);
                     const myslot = ptr(ch.me).add(eposOffsets.slot).readU8() % 2
-                    if(player == ch.me) {
-                        if(ch.win) win(pt.add(eposOffsets.slot).readU8() % 2);
-                    } else if(ch.kick) {
+                    if(player !== ch.me && ch.kick) {
                         let n = pt.readS32()
                         let slot = pt.add(eposOffsets.slot).readU8() % 2
                         if(n > 0 && myslot != slot && !excs.includes(n)){

@@ -459,18 +459,6 @@ app.on("ready", async () => {
                                 ipcMain.on("change-NaN", (e) => {
                                     script.post(['change-NaN']);
                                 });
-                                ipcMain.on("match-win", (e) => script.post(['match-win']));
-                                ipcMain.on("match-lose", (e) => script.post(['match-lose']));
-                                ipcMain.on("match-draw", (e) => script.post(['match-draw']));
-                                ipcMain.on("match-milk", (e) => script.post(['match-milk']));
-                                ipcMain.on("match-choco", (e) => script.post(['match-choco']));
-                                ipcMain.on("receive-dia", (e, amount: number) => script.post(['receive-dia', amount]));
-                                ipcMain.on("receive-gold", (e, amount: number) => script.post(['receive-gold', amount]));
-                                ipcMain.on("receive-xp", (e, amount: number) => script.post(['receive-xp', amount]));
-                                ipcMain.on("receive-clan-xp", (e, amount: number) => script.post(['receive-clan-xp', amount]));
-                                ipcMain.on("receive-sl-coin", (e, amount: number) => script.post(['receive-sl-coin', amount]));
-                                ipcMain.on("receive-sl-point", (e, amount: number) => script.post(['receive-sl-point', amount]));
-                                ipcMain.on("unlock-sl-medal", (e) => script.post(['unlock-sl-medal']));
                                 ipcMain.on("unlock-all-item", (e, charid: number) => script.post(['unlock-all-item', charid]));
                                 ipcMain.on("unlock-all-char", (e) => script.post(['unlock-all-char']));
                                 ipcMain.on("get-daily-reward", (e, repeat: number) => script.post(['get-daily-reward', repeat]));
@@ -531,16 +519,6 @@ app.on("ready", async () => {
                                 ipcMain.removeAllListeners("except-number");
                                 ipcMain.removeAllListeners("change-NaN");
                                 ipcMain.removeAllListeners("change-ads-reward");
-                                ipcMain.removeAllListeners("match-win");
-                                ipcMain.removeAllListeners("match-lose");
-                                ipcMain.removeAllListeners("match-draw");
-                                ipcMain.removeAllListeners("receive-dia");
-                                ipcMain.removeAllListeners("receive-gold");
-                                ipcMain.removeAllListeners("receive-xp");
-                                ipcMain.removeAllListeners("receive-clan-xp");
-                                ipcMain.removeAllListeners("receive-sl-coin");
-                                ipcMain.removeAllListeners("receive-sl-point");
-                                ipcMain.removeAllListeners("unlock-sl-medal");
                                 ipcMain.removeAllListeners("unlock-all-item");
                                 ipcMain.removeAllListeners("get-daily-reward");
                                 ipcMain.removeAllListeners("kick-player");

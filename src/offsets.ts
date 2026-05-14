@@ -191,22 +191,6 @@ export const _eposOffset = {
 //   Both agent.ts and inj.ts resolve every Module.findExportByName / NativeFunction
 //   target through this table — never inline a mangled name in a script file.
 export const _symbols = {
-    // ---- SystemPacketSend cheats ----
-    'cheat.setMoney':                       "_ZN16SystemPacketSend13CheatSetMoneyEii",
-    'cheat.setGold':                        "_ZN16SystemPacketSend12CheatSetGoldEii",
-    'cheat.setBMoney':                      "_ZN16SystemPacketSend14CheatSetBMoneyEii",
-    'cheat.setClanExp':                     "_ZN16SystemPacketSend15CheatSetClanExpEj",
-    'cheat.setLatency':                     "_ZN16SystemPacketSend15CheatSetLatencyEj",
-    'cheat.setStarLeaguePoint':             "_ZN16SystemPacketSend23CheatSetStarLeaguePointEt",
-    'cheat.setStarLeagueCoin':              "_ZN16SystemPacketSend22CheatSetStarLeagueCoinEj",
-    'cheat.getStarLeagueReward':            "_ZN16SystemPacketSend24CheatGetStarLeagueRewardEv",
-    'cheat.getStarLeagueMedal':             "_ZN16SystemPacketSend23CheatGetStarLeagueMedalEhm",
-    'cheat.setGradeAndPoint':               "_ZN16SystemPacketSend21CheatSetGradeAndPointEhj",
-    'cheat.setPoint':                       "_ZN16SystemPacketSend13CheatSetPointEhj",
-    'cheat.setAllSkillCoolTimeOneSecond':   "_ZN16SystemPacketSend33CheatSetAllSkillCoolTimeOneSecondEb",
-    'cheat.forceEndGame':                   "_ZN16SystemPacketSend17CheatForceEndGameENS_16ForceEndGameTypeE",
-    'cheat.disconnectGameServer':           "_ZN16SystemPacketSend39CheatDisconnectGameServerFromDataServerEh",
-
     // ---- SystemPacketSend buy / shop ----
     'buy.buyWithGold':                      "_ZN16SystemPacketSend11BuyWithGoldEh",
     'buy.buyCharacter':                     "_ZN16SystemPacketSend12BuyCharacterEh",
