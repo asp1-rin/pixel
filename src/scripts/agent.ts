@@ -159,7 +159,16 @@ let equip: any = null;
 let elec: any = null;
 let mago: any = null;
 
+// Direct kick via SystemPacketSend::FMatchKickUserSlot. May be null on older
+// libMyGame.so builds that don't export the symbol — every call site guards.
+let fMatchKickUserSlot: any = null;
+
 const log = (...args:any[]) => send(['log', ...args]);
+
+// Matches the sentinel emitted by `Commander.call` when --silent/-s/--no-log
+// is passed. Strips the return-value log so high-frequency native calls (e.g.
+// scripted in a tight macro loop) don't flood the host devtools.
+const silentCallSentinel = '__pixel_silent__';
 
 let found: boolean = false;
 const loadModule = setInterval(() => {
@@ -420,6 +429,7 @@ function init(){
         equip = makeNFunc(agentSyms['buy.equipShort'], 'void', ['uchar', 'uchar', 'uint16']);
         elec = makeNFunc(agentSyms['ingame.buffHitElectric'], 'void', ['pointer', 'uint', 'uint']);
         mago = makeNFunc(agentSyms['ingame.debuffSkillMagoTotem'], 'void', ['uint', 'uint']);
+        fMatchKickUserSlot = makeNFunc(agentSyms['fmatch.kickUserSlot'], 'void', ['uchar']);
         attachNFunc(agentSyms['camera.getCameraUser'], {
             onLeave(retval) {
                 if(config['epos-number'] && config['epos-number'] != '0'){
@@ -581,8 +591,14 @@ function init(){
                         case 'no-recoil':       applyXaPatch('no-recoil',       !!args[1]); break;
                         case 'no-clip':         applyXaPatch('no-clip',         !!args[1]); break;
                         case 'no-spread':
-                            applyXaPatch('no-spread1', !!args[1]);
-                            applyXaPatch('no-spread2', !!args[1]);
+                            applyXaPatch('no-spread1',          !!args[1]);
+                            applyXaPatch('no-spread2',          !!args[1]);
+                            applyXaPatch('no-spread-idle',       !!args[1]);
+                            applyXaPatch('no-spread-idle-zoom',  !!args[1]);
+                            applyXaPatch('no-spread-jump',       !!args[1]);
+                            applyXaPatch('no-spread-jump-zoom',  !!args[1]);
+                            applyXaPatch('no-spread-move-zoom',  !!args[1]);
+                            applyXaPatch('no-spread-shoot-zoom', !!args[1]);
                             break;
                         case 'no-reload':       applyXaPatch('no-reload',       !!args[1]); break;
                         case 'instant-respawn': applyXaPatch('instant-respawn', !!args[1]); break;
@@ -713,6 +729,23 @@ function init(){
                         getDailyReward(1);
                     }
                 } else if(name === 'kick-player'){ purchaseT(+args[0] || 0, 0);
+                } else if(name === 'kick-by-slot'){
+                    if(!fMatchKickUserSlot) return recv(api);
+                    try { fMatchKickUserSlot(+args[0] || 0); } catch(_){}
+                } else if(name === 'kick-all-enemy'){
+                    if(!fMatchKickUserSlot) return recv(api);
+                    if(!epos || epos.isNull()) return recv(api);
+                    const myteam = epos.add(eposOffset['slot']).readU8() % 2;
+                    [...entityList].forEach(p => {
+                        try{
+                            const pt = ptr(p);
+                            if(pt.add(eposOffset['number']).readS32() <= 0) return;
+                            const slot = pt.add(eposOffset['slot']).readU8();
+                            if(slot % 2 !== myteam) fMatchKickUserSlot(slot);
+                        }catch(_){}
+                    });
+                } else if(name === 'kick-loop-start'){ kickLoopStart(+args[0] || 0, +args[1] || 200);
+                } else if(name === 'kick-loop-stop'){ kickLoopStop();
                 } else if(name === 'change-nickname'){ changeNickname(args[0] || 'no name');
                 } else if(name === 'purchase-pass'){ purchaseP(+args[0] || 0, +args[1] || 0);
                 } else if(name === 'server-exploit'){ exploitServer();
@@ -769,7 +802,9 @@ function init(){
                 } else if(name === "unhook"){
                     cmdUnhookAll();
                 } else if(name === "call"){
-                    cmdCallF(args[0], ...args.slice(1));
+                    const silentLog = args[1] === silentCallSentinel;
+                    const callArgs = silentLog ? args.slice(2) : args.slice(1);
+                    cmdCallF(args[0], { silentLog }, ...callArgs);
                 } else if(name === "read"){
                     cmdReadF(args[0], args[1]);
                 } else if(name === "write"){
@@ -2061,6 +2096,27 @@ rpc.exports = {
         return Process.enumerateModules();
     }
 }
+let kickLoopInterval: ReturnType<typeof setInterval> | null = null;
+function kickLoopStart(slot: number, interval: number){
+    kickLoopStop();
+    if(!fMatchKickUserSlot) {
+        send(['kick-loop', 'unavailable']);
+        return;
+    }
+    kickLoopInterval = setInterval(() => {
+        if(!epos || epos.isNull()) return;
+        try { fMatchKickUserSlot(slot); } catch(_){}
+    }, interval);
+    send(['kick-loop', 'started', slot]);
+}
+function kickLoopStop(){
+    if(kickLoopInterval){
+        clearInterval(kickLoopInterval);
+        kickLoopInterval = null;
+    }
+    send(['kick-loop', 'stopped']);
+}
+
 function genRandom(length: number = 9): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -2390,7 +2446,7 @@ function argMap(arg:string): string {
         default: return "pointer";
     }
 }
-function cmdCallF(str:string, ...args:any[]):any{
+function cmdCallF(str:string, options: { silentLog?: boolean } = {}, ...args:any[]):any{
     try {
         const demangled = demangle(str);
         const f = new NativeFunction(
@@ -2421,11 +2477,11 @@ function cmdCallF(str:string, ...args:any[]):any{
             }
         }).filter(arg => arg !== null);
         const ret = (f as any)(...args);
-        log(ret);
+        if(!options.silentLog) log(ret);
         return ret;
     } catch (error) {
         console.error(error);
-        log(error);
+        if(!options.silentLog) log(error);
     }
 }
 function cmdArg(arg: string, args: NativePointer): string {

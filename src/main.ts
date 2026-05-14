@@ -813,6 +813,42 @@ const lan:{[key:string]:{[key:string]:string}} = {
         'ja':'自動キックマーク無視',
         'zh':'自动踢忽略标记',
     },
+    'slot-kicker':{
+        'en':'Slot Kicker',
+        'ko':'슬롯 킥',
+        'ja':'スロットキッカー',
+        'zh':'按位置踢',
+    },
+    'kick-all-enemy':{
+        'en':'Kick All Enemy',
+        'ko':'상대팀 전체 킥',
+        'ja':'敵全員キック',
+        'zh':'踢出全部敌人',
+    },
+    'kick-loop-start':{
+        'en':'Kick Loop Start',
+        'ko':'킥 루프 시작',
+        'ja':'キックループ開始',
+        'zh':'踢循环开始',
+    },
+    'kick-loop-stop':{
+        'en':'Kick Loop Stop',
+        'ko':'킥 루프 중지',
+        'ja':'キックループ停止',
+        'zh':'踢循环停止',
+    },
+    'slot':{
+        'en':'Slot',
+        'ko':'슬롯',
+        'ja':'スロット',
+        'zh':'位置',
+    },
+    'interval-ms':{
+        'en':'Interval (ms)',
+        'ko':'간격 (ms)',
+        'ja':'間隔 (ms)',
+        'zh':'间隔 (毫秒)',
+    },
     'debuff': {
         'en':'Debuff',
         'ko':'디버프',
@@ -1613,6 +1649,18 @@ $_('unlock-all-char').addEventListener('click', () => {ipcRenderer.send('unlock-
 $_('get-daily-reward').addEventListener('click', () => {ipcRenderer.send('get-daily-reward', parseInt($i('get-daily-reward-repeat').value) || 1);});
 
 $_('kick-player').addEventListener('click', () => {ipcRenderer.send('kick-player', parseInt($i('kick-player-number').value) || 0);});
+
+// Slot kicker (FMatchKickUserSlot): per-slot buttons, all-enemy, and a loop.
+for(let i = 0; i < 10; i++){
+    $_(`kick-slot-${i}`)?.addEventListener('click', () => {ipcRenderer.send('kick-by-slot', i);});
+}
+$_('kick-all-enemy')?.addEventListener('click', () => {ipcRenderer.send('kick-all-enemy');});
+$_('kick-loop-start')?.addEventListener('click', () => {
+    const slot = (parseInt($i('kick-loop-slot').value) || 1) - 1;
+    const interval = parseInt($i('kick-loop-interval').value) || 200;
+    ipcRenderer.send('kick-loop-start', slot, interval);
+});
+$_('kick-loop-stop')?.addEventListener('click', () => {ipcRenderer.send('kick-loop-stop');});
 $_('change-nickname').addEventListener('click', () => {ipcRenderer.send('change-nickname', $i('nickname-value').value || '');});
 $_('purchase-pass').addEventListener('click', () => {ipcRenderer.send('purchase-pass', parseInt($i('purchase-player-number').value) || 0, parseInt($i('purchase-item').value) || 1);});
 // $_('server-exploit').addEventListener('click', () => {ipcRenderer.send('server-exploit');});

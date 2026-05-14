@@ -22,6 +22,17 @@ export const _xaOffset = {
     'no-clip':         { name: "_ZN14UserMoveSystem6MoveAIERNS_13CollisionDataERN7cocos2d4Vec3ES4_fR9GameSceneR9UserInforf",          offset: -0x4 },
     'no-spread1':      { name: "_ZN20CharStatusCalculator18GetAimSpreadMovingERK9UserInfor",                                          offset: 0x10 },
     'no-spread2':      { name: "_ZN20CharStatusCalculator20GetAimSpreadShootingERK9UserInfor",                                        offset: 0x10 },
+    // Spread::GetAimGapByCurState() embeds several float immediates, one per
+    // (state × zoom) bucket. Patching only no-spread1/no-spread2 leaves the
+    // idle / jump / per-bucket-zoom gaps untouched, so a fully-still or
+    // mid-air shot still spreads. Each offset below is a distinct immediate
+    // inside that single function.
+    'no-spread-idle':       { name: "_ZN6Spread19GetAimGapByCurStateEv",                                                              offset: 0x14C },
+    'no-spread-idle-zoom':  { name: "_ZN6Spread19GetAimGapByCurStateEv",                                                              offset: 0x144 },
+    'no-spread-jump':       { name: "_ZN6Spread19GetAimGapByCurStateEv",                                                              offset: 0x104 },
+    'no-spread-jump-zoom':  { name: "_ZN6Spread19GetAimGapByCurStateEv",                                                              offset: 0xDC  },
+    'no-spread-move-zoom':  { name: "_ZN6Spread19GetAimGapByCurStateEv",                                                              offset: 0xFC  },
+    'no-spread-shoot-zoom': { name: "_ZN6Spread19GetAimGapByCurStateEv",                                                              offset: 0x124 },
     'no-reload':       { name: "_ZN20CharStatusCalculator18GetReloadSpeedRateERK9UserInfor",                                          offset: 0x10 },
     'instant-respawn': { name: "_ZNK9GameScene14GetRespawnTimeEv",                                                                    offset: 0x18 },
     'body-one-kill':   { name: "_ZN20CharStatusCalculator21GetBodyShotDamageRateERK9UserInfor",                                       offset: 0x0  },
@@ -41,6 +52,14 @@ export const _xaPatch = {
     'no-clip':         { on: 100,            off: 0.01,           type: 'f32' as const },
     'no-spread1':      { on: 505_942_016,    off: -1_119_869_952, type: 's32' as const },
     'no-spread2':      { on: 505_942_016,    off: -1_119_870_976, type: 's32' as const },
+    // ON = fmov s0, wzr (zero spread). OFF values are the original per-bucket
+    // immediates inside Spread::GetAimGapByCurState.
+    'no-spread-idle':       { on: 505_942_016, off: -1_119_871_328, type: 's32' as const },
+    'no-spread-idle-zoom':  { on: 505_942_016, off: -1_119_867_232, type: 's32' as const },
+    'no-spread-jump':       { on: 505_942_016, off: -1_119_868_256, type: 's32' as const },
+    'no-spread-jump-zoom':  { on: 505_942_016, off: -1_119_864_160, type: 's32' as const },
+    'no-spread-move-zoom':  { on: 505_942_016, off: -1_119_865_184, type: 's32' as const },
+    'no-spread-shoot-zoom': { on: 505_942_016, off: -1_119_866_208, type: 's32' as const },
     'no-reload':       { on: 505_925_632,    off: -1_136_562_176, type: 's32' as const },
     'instant-respawn': { on: 505_415_680,    off: 505_415_712,    type: 's32' as const },
     'body-one-kill':   { on: 505_925_632,    off: 506_335_232,    type: 's32' as const },
@@ -317,6 +336,12 @@ export const _symbols = {
     'global.reportClanMark':                "_ZN16SystemPacketSend14ReportClanMarkEjj",
     'global.reportHackingUser':             "_ZN16SystemPacketSend17ReportHackingUserEjjh",
     'global.sendReqDailyBonus':             "_ZN16SystemPacketSend17SendReqDailyBonusEh",
+
+    // ---- FMatch (custom-room admin / kick) ----
+    //   Not present in older libMyGame.so builds. agent.ts must use
+    //   findExportByName so the lookup degrades to a no-op if the symbol is
+    //   missing, instead of failing the whole agent init.
+    'fmatch.kickUserSlot':                  "_ZN16SystemPacketSend18FMatchKickUserSlotEh",
 
     // ---- Camera (Cloud::CameraData) ----
     'camera.getCamera':                     "_ZN5Cloud10CameraData9GetCameraEv",
