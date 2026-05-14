@@ -110,78 +110,71 @@ export const _anPatch = {} as const;
 //   Frida CLI script (inj.ts). Aliases are listed together so both scripts
 //   resolve them from the same table.
 export const _eposOffset = {
-    'number':       0x0,   // int32
-    'exp':          0x4,   // int32
-    'totalkill':    0x8,   // int32
-    'totaldeath':   0xC,   // int32
-    'totalassist':  0x10,  // int32
-    'charkda':      0x14,  // float (alias: kda)
-    'kda':          0x14,  // float (alias of charkda — used by inj.ts)
-    'kill':         0x18,  // int32
-    'death':        0x1C,  // int32
-    'assist':       0x20,  // int32
-    'hp':           0x2C,  // int16
-    'weapon':       0x2E,  // int16
-    'barrier':      0x30,  // int16
-    'nickname':     0x90,  // string 10 changed
-    'char':         0xAD,  // byte (alias: sk)
-    'sk':           0xAD,  // byte (alias of char — used by inj.ts)
-    'fall':         0xAF,  // byte
-    'slot':         0xC0,  // byte
-    'movable':      0xC2,  // byte
-    'timer':        0xD0,  // float changed
-    'skillcool':    0xCC,  // float (alias: sc)
-    'sc':           0xCC,  // float (alias of skillcool — used by inj.ts)
-    'dc':           0xE0,  // float
-    'w1c':          0xE8,  // float
-    'w2c':          0xEC,  // float
-    'dz':           0xFC,  // float
-    'dx':           0x100, // float
-    'dz2':          0x110, // float (inj.ts alias for raw input dz)
-    'dx2':          0x114, // float (inj.ts alias for raw input dx)
-    // NOTE: state/skill were moved to 0x134/0x135 in the "Update offsets..."
-    // commit, but dy(float) is also at 0x134 and dy/gx/gy/gz did not shift.
-    // That made state read dy's float bytes as an int32, breaking isDead and
-    // every cheat that branches on state (no-timer, instant-respawn, etc.).
-    // Reverted to the pre-shift positions which match dy's gap layout. If a
-    // future libMyGame.so update really does move state, update dy/gx/gy/gz
-    // by the same delta so the collision check below stays green.
-    'state':        0x12C, // byte / int32
-    'skill':        0x12D, // byte
-    'dy':           0x134, // float
-    'gx':           0x13C, // float
-    'gy':           0x140, // float
-    'gz':           0x144, // float
-    'hookx':        0x160, // float
-    'hooky':        0x164, // float
-    'hookz':        0x168, // float
-    'hookdx':       0x16C, // float
-    'hookdy':       0x170, // float
-    'hookdz':       0x174, // float
-    'kbdx':         0x184, // float
-    'kbdy':         0x188, // float
-    'kbdz':         0x18C, // float
-    'zr1':          0x18C, // float
-    'x':            0x198, // float changed
-    'y':            0x19C, // float changed
-    'z':            0x1A0, // float changed
-    'zr2':          0x1A4, // float (shifted +0x08 with x/y/z; was colliding with y at 0x19C and emptying getFilteredEntityList)
-    'gc':           0x1A8, // float
-    'ox':           0x1AC, // float
-    'oy':           0x1B0, // float
-    'oz':           0x1B4, // float
-    'lastkilled':   0xE5C, // int32
-    'chainedhit':   0xE60, // byte
-    'skilled':      0xE6C, // int32
-    'curkda':       0xEA0, // float
-    'maxhp':        0xEF4, // int32
-    'maxbarrier':   0xEF8, // int32
-    'w1code':       0xEAE, // byte
-    'w2code':       0xEB0, // byte
-    'gcode':        0xEB2, // byte
-    'bulletusedw1': 0xEB4, // byte
-    'bulletusedw2': 0xEB6, // byte
-    'pointer':      0xF00, // pointer
+    'number':       0x0,
+    'exp':          0x4,
+    'totalkill':    0x8,
+    'totaldeath':   0xC,
+    'totalassist':  0x10,
+    'charkda':      0x14,
+    'kda':          0x14,
+    'kill':         0x18,
+    'death':        0x1C,
+    'assist':       0x20,
+    'hp':           0x2C,
+    'weapon':       0x2E,
+    'barrier':      0x30,
+    'nickname':     0x90,
+    'char':         0xB5,
+    'sk':           0xB5,
+    'fall':         0xB7,
+    'slot':         0xC8,
+    'movable':      0xCA,
+    'timer':        0xD0,
+    'skillcool':    0xD4,
+    'sc':           0xD4,
+    'dc':           0xE8,
+    'w1c':          0xF0,
+    'w2c':          0xF4,
+    'dz':           0x104,
+    'dx':           0x108,
+    'dz2':          0x118,
+    'dx2':          0x11C,
+    'state':        0x134,
+    'skill':        0x135,
+    'dy':           0x13C,
+    'gx':           0x144,
+    'gy':           0x148,
+    'gz':           0x14C,
+    'hookx':        0x168,
+    'hooky':        0x16C,
+    'hookz':        0x170,
+    'hookdx':       0x174,
+    'hookdy':       0x178,
+    'hookdz':       0x17C,
+    'kbdx':         0x18C,
+    'kbdy':         0x190,
+    'kbdz':         0x194,
+    'zr1':          0x194,
+    'x':            0x198,
+    'y':            0x19C,
+    'z':            0x1A0,
+    'zr2':          0x1AC,
+    'gc':           0x1B0,
+    'ox':           0x1B4,
+    'oy':           0x1B8,
+    'oz':           0x1BC,
+    'lastkilled':   0xE64,
+    'chainedhit':   0xE68,
+    'skilled':      0xE74,
+    'curkda':       0xEA8,
+    'maxhp':        0xEFC,
+    'maxbarrier':   0xF00,
+    'w1code':       0xEB6,
+    'w2code':       0xEB8,
+    'gcode':        0xEBA,
+    'bulletusedw1': 0xEBC,
+    'bulletusedw2': 0xEBE,
+    'pointer':      0xF08,
 } as const;
 
 // -----------------------------------------------------------------------------
