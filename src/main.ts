@@ -1252,8 +1252,8 @@ $$_('.config').forEach((el:HTMLElement) => {
     }
 });
 let cs = localStorage.getItem('config');
-if(cs) config = JSON.parse(cs);
-else localStorage.setItem('config', JSON.stringify(config));
+if(cs) config = { ...config, ...JSON.parse(cs) };
+localStorage.setItem('config', JSON.stringify(config));
 for(const key in config){
     const el:HTMLElement = $_(key);
     if(!el) continue;

@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 let configg:Config = ipcRenderer.sendSync("get-config");
 ipcRenderer.on("init-config", (event, config:Config) => {configg = config;});
 
-canvas.style.borderColor = configg['esp-color'] || 'red';
+canvas.style.outlineColor = configg['esp-color'] || 'red';
 
 let aimCircle:{radius:number;color:string;active:boolean}|null = null;
 let aimCircleClearAt = 0;
@@ -15,7 +15,7 @@ const AIM_CIRCLE_TIMEOUT = 200;
 ipcRenderer.on("config", (event, id:string, value:any) => {
     configg[id] = value;
     if(id === 'esp-color') {
-        canvas.style.borderColor = value;
+        canvas.style.outlineColor = value;
     };
 });
 
