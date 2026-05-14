@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "pixel",
   "version": "2.2.0",
   "description": "milkchoco frida cheat tool",
@@ -46,7 +46,7 @@
     "typescript": "^5.8.3"
   },
   "build": {
-    "appId": "com.necpition205.pixel",
+    "appId": "com.asp1-rin.pixel",
     "productName": "pixel",
     "win": {
       "target": "nsis",
@@ -79,13 +79,14 @@
       {
         "provider": "github",
         "private": true,
-        "owner": "necpition205",
+        "owner": "asp1-rin",
         "repo": "pixel"
       }
     ]
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/necpition205/pixel.git"
+    "url": "https://github.com/asp1-rin/pixel.git"
   }
 }
+
