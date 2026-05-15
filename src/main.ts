@@ -1113,6 +1113,18 @@ const lan:{[key:string]:{[key:string]:string}} = {
         'ja':'山マップ',
         'zh':'山地图',
     },
+    'teleport':{
+        'en':'Teleport',
+        'ko':'순간이동',
+        'ja':'テレポート',
+        'zh':'传送',
+    },
+    'map':{
+        'en':'Map',
+        'ko':'맵',
+        'ja':'マップ',
+        'zh':'地图',
+    },
     'macro':{
         'en':'Macro',
         'ko':'매크로',
@@ -1510,6 +1522,80 @@ yel.addEventListener('change', blurCurrent);
 zel.addEventListener('change', blurCurrent);
 sel.addEventListener('change', blurCurrent);
 // tel.addEventListener('change', blurCurrent);
+
+// Capture-the-Milk teleport coordinates per map (from For Claude/capture milk data.txt).
+// Each map has 4 milk and 4 choco target spots; clicking a button moves the
+// player entity to the chosen [x, y, z] via the existing `pos` IPC channel.
+type TeleportPoint = [number, number, number];
+const teleportCoords: Record<string, { milk: TeleportPoint[]; choco: TeleportPoint[] }> = {
+    '1': {
+        milk: [
+            [261.2665, 48.21943365,  71.68717],
+            [261.2665, 48.21943365,  44.69466],
+            [261.2665, 48.21943365, -44.18560],
+            [261.2665, 48.21943365, -71.52375],
+        ],
+        choco: [
+            [-261.2665, 48.21943365,  71.68717],
+            [-261.2665, 48.21943365,  44.69466],
+            [-261.2665, 48.21943365, -44.18560],
+            [-261.2665, 48.21943365, -71.52375],
+        ],
+    },
+    '2': {
+        milk: [
+            [175.71618, 38.3997101, -144.57347],
+            [208.81658, 38.3997101, -111.58444],
+            [175.71618, 38.3997101, -111.58444],
+            [208.81658, 38.3997101, -144.57347],
+        ],
+        choco: [
+            [-175.71618, 38.4000153, 144.57347],
+            [-208.81658, 38.4000153, 111.58444],
+            [-175.71618, 38.4000153, 111.58444],
+            [-208.81658, 38.4000153, 144.57347],
+        ],
+    },
+    '3': {
+        milk: [
+            [242.23381, 19.2000463,  60.50044],
+            [242.23381, 19.2000463,  37.09999],
+            [242.23381, 19.2000463, -37.09999],
+            [242.23381, 19.2000463, -60.50044],
+        ],
+        choco: [
+            [-242.23381, 19.2000463,  60.50044],
+            [-242.23381, 19.2000463,  37.09999],
+            [-242.23381, 19.2000463, -37.09999],
+            [-242.23381, 19.2000463, -60.50044],
+        ],
+    },
+    '4': {
+        milk: [
+            [161.88835, 0.00002479, 158.02603],
+            [161.88835, 0.00002479, 142.92604],
+            [161.88835, 0.00002479, 105.92604],
+            [161.88835, 0.00002479,  90.92604],
+        ],
+        choco: [
+            [-161.88835, 0.00001708984382, -158.02603],
+            [-161.88835, 0.00001708984382, -142.92604],
+            [-161.88835, 0.00001708984382, -105.92604],
+            [-161.88835, 0.00001708984382,  -90.92604],
+        ],
+    },
+};
+
+$$_('.teleport-btn').forEach((el:HTMLButtonElement) => {
+    el.addEventListener('click', () => {
+        const mapId = $i('teleport-map').value || '1';
+        const side = el.dataset.side as 'milk' | 'choco';
+        const index = parseInt(el.dataset.index || '0', 10);
+        const point = teleportCoords[mapId]?.[side]?.[index];
+        if(!point) return;
+        ipcRenderer.send('pos', point);
+    });
+});
 
 // $_('ctm-default-milk').addEventListener('click', () => {ipcRenderer.send('ctm-default-milk');});
 // $_('ctm-default-choco').addEventListener('click', () => {ipcRenderer.send('ctm-default-choco');});
