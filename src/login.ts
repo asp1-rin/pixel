@@ -54,8 +54,8 @@ const renderLoginForm = () => {
         '<input id="login-id" type="text" placeholder="ID" autocomplete="username" spellcheck="false" class="w-full text-center">' +
         '<input id="login-pw" type="password" placeholder="Password" autocomplete="current-password" class="w-full text-center">' +
         '<button id="logbtn" class="w-full"></button>' +
-        '<p id="logerr" class="w-full text-red-400 text-center"></p>' +
-        '<a id="loglink" href="#" class="w-full text-center text-xs text-neutral-500 underline">Request account on pixel-code-web</a>';
+        '<p id="logerr" class="w-full text-center"></p>' +
+        '<a id="loglink" href="#" class="w-full text-center">Request access</a>';
     const btn = $("logbtn");
     if (btn) btn.textContent = loginLabel();
     const onKey = (e: Event) => { if ((e as KeyboardEvent).key === "Enter") void submitLogin(); };

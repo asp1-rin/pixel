@@ -16,10 +16,24 @@
         <option value="zh">中文</option>
     </select>
     <!-- back button -->
-    <button id="back" class="hide"><i class="fa fa-arrow-left"></i></button>
+    <button id="back" class="hide" aria-label="back"><i class="fa fa-chevron-left"></i></button>
+    <!-- in-app brand badge -->
+    <div id="brand" aria-hidden="true">
+        <span class="dot"></span>
+        <span class="name">Pixel</span>
+        <span class="ver">v2.2.0</span>
+    </div>
     <!-- login page -->
     <div class="page" id="login">
-        <img src="./icon.svg" style="width: 30vw; height: 30vw;" alt="icon">
+        <div class="hero">
+            <img src="./icon.svg" alt="icon">
+            <div class="wordmark">PIXEL</div>
+            <div class="meta">
+                <span>v2.2.0</span>
+                <span class="sep"></span>
+                <span>Precision</span>
+            </div>
+        </div>
         <div class="form">
             <!-- auto updater -->
             <p id="updp" class="w-full text-center" data-lang="checking-for-updates"></p>

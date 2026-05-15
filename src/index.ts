@@ -104,11 +104,14 @@ const getExceptNums = async (): Promise<number[]> => [];
 
 // main app events
 app.on("ready", async () => {
-    main = createWindow("main", 300, 400, true, {
+    main = createWindow("main", 380, 620, true, {
         title: `Pixel v${app.getVersion()}`,
         maximizable: false,
         fullscreenable: false,
         fullscreen: false,
+        backgroundColor: "#08080b",
+        minWidth: 340,
+        minHeight: 520,
     }, async () => {
         try{
             Logger.info(isDev ? "Development mode" : "Production mode");
