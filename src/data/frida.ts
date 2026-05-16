@@ -1,8 +1,46 @@
 import { Client } from "adb-ts"
 import Logger from "electron-log"
 import * as frida from "frida"
+import { existsSync } from "fs"
+import * as path from "path"
 
-export const adb = new Client({})
+// Bundled binaries (scripts/fetch-binaries.cjs → bin/, shipped via
+// electron-builder extraResources). Resolve across dev and packaged layouts;
+// fall back to whatever is on PATH / the device so nothing breaks if the
+// bundle is ever absent.
+const binCandidates = (...segments:string[]):string[] => {
+    const dirs = [
+        process.resourcesPath ? path.join(process.resourcesPath, "bin") : "",
+        path.join(__dirname, "..", "..", "bin"),
+        path.join(__dirname, "..", "..", "..", "bin"),
+    ].filter(Boolean)
+    return dirs.map(d => path.join(d, ...segments))
+}
+
+const resolveBin = (...segments:string[]):string => {
+    for (const p of binCandidates(...segments)) {
+        if (existsSync(p)) return p
+    }
+    return ""
+}
+
+const adbBin = resolveBin("adb", "adb.exe")
+
+export const fridaServerBin = (version:string, arch:string):string =>
+    resolveBin("frida-server", `frida-server-${version}-android-${arch}`)
+
+export const adb = new Client(adbBin ? { bin: adbBin } : {})
+
+export const pushFile = (id:string, src:string, dest:string):Promise<void> =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const transfer = await adb.push(id, src, dest)
+            transfer.on("end", () => resolve())
+            transfer.on("error", reject)
+        } catch (err) {
+            reject(err)
+        }
+    })
 
 export const getUrl = (version:string, arch:string) => `https://github.com/frida/frida/releases/download/${version}/${fileName(version, arch)}.xz`
 export const fileNameFB = (version:string, arch:string) => `frida-server-${version}-freebsd-${arch}`

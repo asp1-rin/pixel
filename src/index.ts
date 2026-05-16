@@ -10,7 +10,7 @@ import { autoUpdater } from "electron-updater";
 import isDev from "electron-is-dev";
 import frida from "frida";
 import { existsSync, readFileSync } from "fs";
-import { adb, attachProcess, checkFridaPerm, connectFrida, connectAdbDevice, executeProcess, fileExist, fileName, getArch, getUrl, startFrida } from "./data/frida";
+import { adb, attachProcess, checkFridaPerm, connectFrida, connectAdbDevice, executeProcess, fileExist, fileName, fridaServerBin, getArch, getUrl, pushFile, startFrida } from "./data/frida";
 import { loginPixel, defaultWebUrl } from "./data/auth";
 import { exec } from "child_process";
 import { createServer as createPixelServer } from "./core/server";
@@ -297,7 +297,7 @@ app.on("ready", async () => {
         const filePath = result.filePaths[0];
         const name = fileName(frida_version, await getArch(adbId));
         try{
-            adb.push(adbId, filePath, `/data/local/tmp/${name}`);
+            await pushFile(adbId, filePath, `/data/local/tmp/${name}`);
         } catch(e) {
             Logger.error("Failed to upload frida server");
         }
@@ -309,8 +309,20 @@ app.on("ready", async () => {
         try{
             const arch = await getArch(adbId);
             if(arch === '') return state("server", "error", "Failed to get arch");
-            const filename = await fileExist(adbId, frida_version);
-            if(filename === '') return state("server", "error", "Cannot find frida server");
+            let filename = await fileExist(adbId, frida_version);
+            if(filename === '') {
+                const bundled = fridaServerBin(frida_version, arch);
+                if(bundled === '') return state("server", "error", "Cannot find frida server");
+                const name = fileName(frida_version, arch);
+                state("server", "pending", "Deploying bundled frida server");
+                try {
+                    await pushFile(adbId, bundled, `/data/local/tmp/${name}`);
+                } catch(err) {
+                    Logger.error("Failed to deploy bundled frida server", err);
+                    return state("server", "error", "Failed to deploy frida server");
+                }
+                filename = name;
+            }
             const perm = await checkFridaPerm(adbId, filename);
             if(!perm) return state("server", "error", "Frida permissions denied");
             if(!await startFrida(adbId, filename, () => state("server", "error", "Frida server crashed"))) {
