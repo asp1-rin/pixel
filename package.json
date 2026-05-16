@@ -7,7 +7,8 @@
     "start": "electron .",
     "dist": "electron-builder --publish never",
     "watch": "concurrently \"tsc -w\" \"npx tailwindcss -i ./public/global.css -o ./public/output.css --watch\" \"tsc -w --project tsconfig.scripts.json\"",
-    "build": "tsc && npx tailwindcss -i ./public/global.css -o ./public/output.css --minify && tsc --project tsconfig.scripts.json && node scripts/inject-offsets.cjs",
+    "build": "node scripts/fetch-binaries.cjs && tsc && npx tailwindcss -i ./public/global.css -o ./public/output.css --minify && tsc --project tsconfig.scripts.json && node scripts/inject-offsets.cjs",
+    "fetch-binaries": "node scripts/fetch-binaries.cjs",
     "inject-offsets": "node scripts/inject-offsets.cjs",
     "clean:win": "rd /s /q dist && rd /s /q build && del public/output.css /q",
     "clean:linux": "rm -rf dist build public/output.css",
@@ -34,6 +35,7 @@
     "@types/express": "^5.0.2",
     "@types/frida-gum": "^18.8.2",
     "@types/node": "^22.15.29",
+    "adm-zip": "^0.5.17",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
@@ -43,7 +45,8 @@
     "postcss": "^8.5.6",
     "postcss-loader": "^8.1.1",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "xz-decompress": "^0.2.3"
   },
   "build": {
     "appId": "com.necpition205.pixel",
@@ -72,6 +75,13 @@
           "!global.css",
           "!main.html",
           "!layout.html"
+        ]
+      },
+      {
+        "from": "./bin",
+        "to": "./bin",
+        "filter": [
+          "**/*"
         ]
       }
     ],

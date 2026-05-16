@@ -42,6 +42,9 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Bundled binaries fetched at build time (scripts/fetch-binaries.cjs)
+bin/
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
