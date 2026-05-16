@@ -10,7 +10,7 @@ import { autoUpdater } from "electron-updater";
 import isDev from "electron-is-dev";
 import frida from "frida";
 import { existsSync, readFileSync } from "fs";
-import { adb, attachProcess, checkFridaPerm, connectFrida, connectAdbDevice, executeProcess, fileExist, fileName, fridaServerBin, getArch, getUrl, pushFile, startFrida } from "./data/frida";
+import { adb, attachProcess, autoConnectAdb, checkFridaPerm, connectFrida, connectAdbDevice, executeProcess, fileExist, fileName, fridaServerBin, getArch, getUrl, pushFile, startFrida } from "./data/frida";
 import { loginPixel, defaultWebUrl } from "./data/auth";
 import { exec } from "child_process";
 import { createServer as createPixelServer } from "./core/server";
@@ -251,7 +251,14 @@ app.on("ready", async () => {
     const _main = async (onip:boolean) => {
         try{
             if(onip){
-                adbId = await connectAdbDevice(serial);
+                state("adb", "pending", "Detecting BlueStacks emulator");
+                const resolved = await autoConnectAdb(serial);
+                if(resolved === ''){
+                    return state("adb", "error", "No emulator found. Enable ADB in BlueStacks Settings > Advanced");
+                }
+                serial = resolved;
+                adbId = resolved;
+                if(!main.isDestroyed()) main.webContents.send("serial", resolved);
             } else {
                 const ip = await adb.getIpAddress(serial);
                 if(ip.length > 0) {

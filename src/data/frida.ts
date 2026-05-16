@@ -121,6 +121,72 @@ export const connectAdbDevice = async (serial:string):Promise<string> => {
     return result
 }
 
+const isOnlineState = (d:any):boolean => (d?.state ?? d?.type) === 'device'
+
+// Best-effort: adb-ts exposes listDevices(), but tolerate API/typing drift —
+// callers must not hard-depend on this returning anything.
+export const listAdbDevices = async ():Promise<string[]> => {
+    try {
+        const devices = await (adb as any).listDevices()
+        if (!Array.isArray(devices)) return []
+        return devices.filter(isOnlineState).map((d:any) => d.id)
+    } catch (err) {
+        Logger.error(`[*] Failed to list adb devices: ${err}`)
+        return []
+    }
+}
+
+// Reliable connectivity probe using an API the codebase already relies on.
+const adbResponsive = async (serial:string):Promise<boolean> => {
+    try {
+        const out = await adb.shell(serial, 'echo pixel_ok')
+        return typeof out === 'string' && out.includes('pixel_ok')
+    } catch (_) {
+        return false
+    }
+}
+
+// BlueStacks 5 exposes ADB on 5555 by default; extra instances use a dynamic
+// port in the 556x–569x range. We probe these so an install-only user never
+// has to hunt for the port — they just click "Connect ADB".
+const BLUESTACKS_PORTS = [
+    5555, 5556, 5565, 5575, 5585, 5595,
+    5605, 5615, 5625, 5635, 5645, 5665, 5685,
+]
+
+export const autoConnectAdb = async (preferred:string):Promise<string> => {
+    // 1. Anything already attached (running emulator / prior adb connect) wins.
+    const existing = await listAdbDevices()
+    if (existing.length > 0) {
+        const pick = (preferred && existing.includes(preferred.trim()))
+            ? preferred.trim()
+            : existing[0]
+        if (await adbResponsive(pick)) {
+            Logger.info(`[*] ADB device already connected: ${pick}`)
+            return pick
+        }
+    }
+    // 2. Probe the user-supplied serial first, then common BlueStacks ports.
+    const candidates:string[] = []
+    if (preferred && preferred.trim()) candidates.push(preferred.trim())
+    for (const port of BLUESTACKS_PORTS) {
+        const s = `127.0.0.1:${port}`
+        if (!candidates.includes(s)) candidates.push(s)
+    }
+    for (const serial of candidates) {
+        try {
+            const id = await connectAdbDevice(serial)
+            if (id === '') continue
+            if (await adbResponsive(serial)) {
+                Logger.info(`[*] ADB auto-connected to ${serial}`)
+                return serial
+            }
+        } catch (_) { /* port not listening — try next */ }
+    }
+    Logger.error('[*] ADB auto-connect failed for all candidates')
+    return ''
+}
+
 export const fileExist = async (id:string, version:string):Promise<string> => {
     if(id === '') {
         Logger.error('[*] ADB not connected');

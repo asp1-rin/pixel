@@ -1441,6 +1441,9 @@ ipcRenderer.on('update-state', (e, id:string, state:string, log:string) => {
 ipcRenderer.on('cookie', (e, cookie:string) => {
     $i('cookie').value = cookie;
 });
+ipcRenderer.on('serial', (e, serial:string) => {
+    $i('serial').value = serial;
+});
 
 ipcRenderer.send('serial', $i('serial').value);
 $i('serial').addEventListener('change', () => {ipcRenderer.send('serial', $i('serial').value);});
