@@ -5,11 +5,12 @@
   "description": "Phone-standalone (rooted, no PC) build of the Pixel Frida agent",
   "scripts": {
     "fetch": "node scripts/fetch-frida-inject.cjs",
-    "build": "node scripts/fetch-frida-inject.cjs && tsc && node build.cjs"
+    "build": "node scripts/fetch-frida-inject.cjs && tsc && node scripts/build-web.cjs && node build.cjs"
   },
   "devDependencies": {
     "@types/frida-gum": "^18.8.2",
     "adm-zip": "^0.5.17",
+    "esbuild": "^0.23.1",
     "typescript": "^5.8.3",
     "xz-decompress": "^0.2.3"
   }

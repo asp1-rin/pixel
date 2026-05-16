@@ -10,37 +10,58 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  bundle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Upload bundles (artifact)
-        uses: actions/upload-artifact@v4
+      - run: npm install
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
         with:
-          name: pixel-mobile
+          name: pixel-mobile-bundle
           path: |
             dist/agent.js
             dist/*.zip
 
-      - name: Release (tag or [release] commit)
-        if: startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[release]')
-        uses: softprops/action-gh-release@v2
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build debug APK
+        working-directory: app
+        run: gradle --no-daemon assembleDebug
+      - name: Rename APK
+        run: cp app/app/build/outputs/apk/debug/app-debug.apk pixel-mobile.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pixel-mobile-apk
+          path: pixel-mobile.apk
+
+  release:
+    needs: [bundle, apk]
+    if: startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: artifacts }
+      - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'mobile-latest' }}
           name: Pixel Mobile
           files: |
-            dist/agent.js
-            dist/*.zip
+            artifacts/**/*.zip
+            artifacts/**/agent.js
+            artifacts/**/pixel-mobile.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

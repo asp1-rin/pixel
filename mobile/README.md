@@ -28,10 +28,12 @@ unchanged** — feature coverage tracks the agent automatically.
 ## Option A — let CI build it (zero local setup)
 
 1. Copy everything in this folder into a new repo, push to `main`.
-2. GitHub Actions (`.github/workflows/build.yml`) builds automatically and
-   attaches **`pixel-mobile-<abi>.zip`** as an artifact (and a Release if the
-   commit message contains `[release]` or you push a `v*` tag).
-3. Download the zip for your phone's ABI (almost always `arm64`).
+2. GitHub Actions (`.github/workflows/build.yml`) automatically builds **both**:
+   - **`pixel-mobile-<abi>.zip`** — agent.js + frida-inject + launch.sh
+   - **`pixel-mobile.apk`** — the installable WebView app
+   (and a GitHub Release if the commit message contains `[release]` or you
+   push a `v*` tag).
+3. Download the zip for your phone's ABI (almost always `arm64`) and the APK.
 
 ## Option B — build locally
 
@@ -89,12 +91,24 @@ mobile/
 desktop Pixel sources, so this project stands alone. Re-copy them from the
 parent repo when the desktop agent changes.
 
+## UI
+
+The **full desktop UI** runs as-is. `web-src/{main,login,ui}` are the
+unmodified desktop renderer; at bundle time `electron` is aliased to
+`web-src/electron-shim.ts`, which maps `ipcRenderer.send/on/invoke` onto the
+in-agent SSE/POST bridge. Because `src/index.ts` is a 1:1 pass-through for
+agent-facing channels, every cheat, the teleport grid, kicker, changer,
+resource tools and settings work; PC-only tabs (ADB/Frida) are inert no-ops.
+Login is bypassed (no web backend on a phone you physically hold).
+
+> Re-copy `agent/` and `web-src/{main,login,ui,output.css,main.html}` from the
+> parent repo whenever the desktop app changes, then rebuild.
+
 ## Honest status
 
-The binary pipeline and generated-script syntax are verified by the build.
-On-device behavior (Frida `Socket`, `frida-inject` under root, SELinux) could
-not be tested from the build environment and needs one real validation pass.
-The panel ships a working core — status, EPOS lock, a toggle grid, and a
-**raw-command box that exposes the full agent protocol** — with a clear path
-to port the polished desktop UI (the hard part, the transport + agent, is
-done).
+Verified by the build: binary pipeline, agent + renderer bundling, and
+generated-script syntax. **Not** verifiable from the build environment and
+needing one real pass: on-device runtime (Frida `Socket`, `frida-inject`
+under root, SELinux) and the APK Gradle build (standard CI recipe, but no
+Android SDK here). Some renderer lifecycle nuances (macro editor persistence,
+finder data) may need device iteration.
