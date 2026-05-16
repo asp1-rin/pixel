@@ -45,6 +45,9 @@ jspm_packages/
 # Bundled binaries fetched at build time (scripts/fetch-binaries.cjs)
 bin/
 
+# Generated phone-standalone injectable (mobile/build.cjs)
+mobile/dist/
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 

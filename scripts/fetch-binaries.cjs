@@ -5,6 +5,8 @@
  *
  *   - Windows `adb.exe` (+ its two DLLs) from Google platform-tools
  *   - `frida-server` for every Android ABI (arm, arm64, x86, x86_64)
+ *   - `frida-inject` for every Android ABI (used by the phone-standalone
+ *     mobile/ build to inject the agent with no PC)
  *
  * Output goes to `bin/` (git-ignored). electron-builder ships `bin/` via
  * `extraResources`, and the app resolves these at runtime instead of
@@ -29,10 +31,14 @@ const ROOT = path.join(__dirname, '..');
 const BIN = path.join(ROOT, 'bin');
 const ADB_DIR = path.join(BIN, 'adb');
 const FRIDA_DIR = path.join(BIN, 'frida-server');
+const INJECT_DIR = path.join(BIN, 'frida-inject');
 
 const fridaName = (arch) => `frida-server-${FRIDA_VERSION}-android-${arch}`;
 const fridaUrl = (arch) =>
     `https://github.com/frida/frida/releases/download/${FRIDA_VERSION}/${fridaName(arch)}.xz`;
+const injectName = (arch) => `frida-inject-${FRIDA_VERSION}-android-${arch}`;
+const injectUrl = (arch) =>
+    `https://github.com/frida/frida/releases/download/${FRIDA_VERSION}/${injectName(arch)}.xz`;
 
 const ok = (p, min) => {
     try { return fs.statSync(p).size >= min; } catch { return false; }
@@ -90,11 +96,30 @@ async function fetchFridaServers() {
     }
 }
 
+async function fetchFridaInject() {
+    fs.mkdirSync(INJECT_DIR, { recursive: true });
+    for (const arch of ARCHES) {
+        const dest = path.join(INJECT_DIR, injectName(arch));
+        if (ok(dest, 100_000)) {
+            console.log(`[fetch-binaries] ${injectName(arch)} already present, skipping`);
+            continue;
+        }
+        console.log(`[fetch-binaries] downloading + decompressing ${injectName(arch)} ...`);
+        const buf = await fetchXz(injectUrl(arch));
+        if (buf.subarray(0, 4).toString('hex') !== '7f454c46') {
+            throw new Error(`decompressed ${injectName(arch)} is not an ELF binary`);
+        }
+        fs.writeFileSync(dest, buf);
+        console.log(`[fetch-binaries]   wrote ${injectName(arch)} (${buf.length} bytes)`);
+    }
+}
+
 (async () => {
     try {
         fs.mkdirSync(BIN, { recursive: true });
         await fetchAdb();
         await fetchFridaServers();
+        await fetchFridaInject();
         console.log('[fetch-binaries] done');
     } catch (err) {
         console.error('[fetch-binaries] FAILED:', err.message);
