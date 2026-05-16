@@ -1,0 +1,46 @@
+name: Build Pixel Mobile
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload bundles (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-mobile
+          path: |
+            dist/agent.js
+            dist/*.zip
+
+      - name: Release (tag or [release] commit)
+        if: startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[release]')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'mobile-latest' }}
+          name: Pixel Mobile
+          files: |
+            dist/agent.js
+            dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

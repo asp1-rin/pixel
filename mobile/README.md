@@ -1,61 +1,58 @@
-# Pixel Mobile — phone-standalone build (no PC)
+# Pixel Mobile — standalone, phone-only (rooted, no PC)
 
-Run the **full existing Frida agent on a rooted phone**, with the control
-panel served as an installable app. No PC, no ADB-from-PC, no Termux Node,
-no Python.
+A **self-contained project**. Copy this folder into any empty repo and it
+builds itself — GitHub Actions runs on push and produces ready-to-copy
+bundles. Then a single **rooted phone** is all you need; no PC, no ADB, no
+Termux Node, no Python.
 
 ```
  frida-inject (root, on phone)            ┌─ phone browser / Pixel WebView app
         │ injects                          │   http://127.0.0.1:27345
         ▼                                  ▼
- com.gameparadiso.milkchoco  ──►  in-process HTTP/SSE server (mobile/src/server.js)
+ com.gameparadiso.milkchoco  ──►  in-process HTTP/SSE server (src/server.js)
         ▲                                  │  shadows Frida send()/recv()
-        └──────────── unmodified desktop agent (public/scripts/agent.js)
+        └──────────── unmodified Pixel agent (agent/agent.ts, compiled)
 ```
 
-The desktop agent talks to its host **only** through the Frida globals
-`send()` / `recv()`. `mobile/src/server.js` shadows those globals and runs a
-tiny web server *inside the game process* (Frida `Socket` API), so the exact
-same agent code is driven by the phone instead of the Electron app. Feature
-coverage therefore tracks the desktop agent automatically.
+The Pixel agent talks to its host **only** through the Frida globals
+`send()`/`recv()`. `src/server.js` shadows them and runs a tiny web server
+*inside the game process* (Frida `Socket` API), so the **entire agent runs
+unchanged** — feature coverage tracks the agent automatically.
 
 > ⚠️ **Root is mandatory.** A non-rooted phone cannot inject into another
-> app — this is the Android sandbox, not a limitation we can code around.
-> Educational / research use only.
+> app (Android sandbox — not something code can bypass). Research/education
+> only.
 
 ---
 
-## Build (on a PC, once)
+## Option A — let CI build it (zero local setup)
+
+1. Copy everything in this folder into a new repo, push to `main`.
+2. GitHub Actions (`.github/workflows/build.yml`) builds automatically and
+   attaches **`pixel-mobile-<abi>.zip`** as an artifact (and a Release if the
+   commit message contains `[release]` or you push a `v*` tag).
+3. Download the zip for your phone's ABI (almost always `arm64`).
+
+## Option B — build locally
 
 ```bash
 npm install
-npm run build          # compiles agent + offsets, fetches bundled binaries
-node mobile/build.cjs   # -> mobile/dist/agent.js
+npm run build      # fetches frida-inject, compiles agent, bundles everything
 ```
 
-`mobile/dist/agent.js` = web assets + server shim + offset-injected agent,
-all in one injectable script.
+Either way you get, per ABI:
 
-The matching injector lives at
-`bin/frida-inject/frida-inject-16.4.10-android-<abi>` (downloaded by
-`npm run build`).
+```
+dist/pixel-mobile-arm64.zip   ->  { agent.js, frida-inject-…-arm64, launch.sh }
+```
 
-## Put files on the phone (once)
+## Put it on the phone (once)
 
-Copy these into `/data/local/tmp/pixel/` on the phone (any method — file
-manager, Termux, or a one-time `adb push`):
-
-| From (repo) | To (phone) |
-| --- | --- |
-| `mobile/dist/agent.js` | `/data/local/tmp/pixel/agent.js` |
-| `bin/frida-inject/frida-inject-16.4.10-android-<abi>` | `/data/local/tmp/pixel/` |
-| `mobile/launch.sh` | `/data/local/tmp/pixel/launch.sh` |
-
-`<abi>`: `arm64` for almost all modern phones (check `getprop ro.product.cpu.abi`).
+Unzip the bundle for your ABI into `/data/local/tmp/pixel/` on the phone
+(file manager / Termux / a one-time `adb push` — anything). Check ABI with
+`getprop ro.product.cpu.abi`.
 
 ## Run (on the phone, as root)
-
-In Termux (with `tsu`/`su`) or any root shell:
 
 ```sh
 su
@@ -63,50 +60,41 @@ cd /data/local/tmp/pixel
 sh launch.sh
 ```
 
-It launches/attaches MilkChoco and injects the agent. Then open
-**http://127.0.0.1:27345** in the phone browser — or install the WebView
-app below so it feels like a normal app.
+It launches/attaches MilkChoco and injects the agent. Open
+**http://127.0.0.1:27345** in the phone browser, or install the WebView app
+(`app/`, build in Android Studio), or "Add to Home screen" (it's a PWA).
 
-> SELinux on some ROMs blocks ptrace even for root. If injection fails,
-> a permissive policy for the shell domain may be required (ROM-specific).
-
-## Optional: the "app" (WebView APK)
-
-`mobile/app/` is an Android Studio project — a fullscreen WebView pointing at
-the agent's panel, with auto-retry until the agent is up.
-
-```
-Open mobile/app/ in Android Studio  →  Run/Build APK  →  install on the phone
-```
-
-(The APK is **not** prebuilt here; building it needs the Android SDK.)
-You can also just "Add to Home screen" from the browser — the panel is a PWA
-(manifest + service worker) so it installs standalone without the APK.
+> Some ROMs' SELinux blocks ptrace even for root; a ROM-specific permissive
+> tweak may be needed if injection fails.
 
 ---
 
-## What is and isn't done
-
-**Done & self-contained:** injection path (bundled `frida-inject`), the
-in-agent HTTP/SSE bridge, the `send`/`recv` shim (so the *entire* desktop
-agent runs unchanged), an installable mobile panel, and the WebView app
-scaffold.
-
-**Honest status:** this could not be tested on a real rooted phone from the
-build environment. The binary pipeline and script syntax are verified; the
-on-device runtime needs one real validation pass. The web panel ships a
-working core (status, EPOS lock, toggle grid, **raw-command box giving full
-protocol access**) plus a clear path to port the polished desktop UI — the
-transport and agent are the hard part and are complete.
-
-## Files
+## Layout
 
 ```
 mobile/
-├── src/server.js     in-agent HTTP/SSE server + Frida send/recv shim
-├── web/              installable PWA panel (index.html, manifest, sw, icon)
-├── build.cjs         agent.js + server + web -> mobile/dist/agent.js
-├── launch.sh         on-device root launcher (bundled frida-inject)
-├── app/              Android WebView APK project (build in Android Studio)
-└── dist/agent.js     generated injectable script
+├── package.json            self-contained (npm install && npm run build)
+├── tsconfig.json
+├── .github/workflows/      auto-build on push (Option A)
+├── agent/                  agent.ts + offsets.ts + type.d.ts (Pixel agent)
+├── src/server.js           in-agent HTTP/SSE bridge + send/recv shim
+├── web/                    installable PWA panel
+├── scripts/fetch-frida-inject.cjs
+├── build.cjs               -> dist/agent.js + dist/pixel-mobile-<abi>.zip
+├── launch.sh               on-device root launcher
+└── app/                    WebView APK project (Android Studio)
 ```
+
+`agent/agent.ts`, `agent/offsets.ts`, `agent/type.d.ts` are copies of the
+desktop Pixel sources, so this project stands alone. Re-copy them from the
+parent repo when the desktop agent changes.
+
+## Honest status
+
+The binary pipeline and generated-script syntax are verified by the build.
+On-device behavior (Frida `Socket`, `frida-inject` under root, SELinux) could
+not be tested from the build environment and needs one real validation pass.
+The panel ships a working core — status, EPOS lock, a toggle grid, and a
+**raw-command box that exposes the full agent protocol** — with a clear path
+to port the polished desktop UI (the hard part, the transport + agent, is
+done).

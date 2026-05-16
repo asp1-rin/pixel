@@ -47,6 +47,9 @@ bin/
 
 # Generated phone-standalone injectable (mobile/build.cjs)
 mobile/dist/
+mobile/build/
+mobile/bin/
+mobile/node_modules/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
