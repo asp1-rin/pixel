@@ -5,6 +5,12 @@ builds itself — GitHub Actions runs on push and produces ready-to-copy
 bundles. Then a single **rooted phone** is all you need; no PC, no ADB, no
 Termux Node, no Python.
 
+**Install-and-go:** the built `pixel-mobile.apk` bundles the agent and the
+frida-inject binaries for every ABI. On launch it requests root, injects into
+MilkChoco itself (the job `launch.sh` used to do by hand), and opens the panel.
+No GameGuardian, no terminal — install the APK, open it, grant the `su` prompt.
+The zip bundle + `launch.sh` remain available as a manual fallback.
+
 ```
  frida-inject (root, on phone)            ┌─ phone browser / Pixel WebView app
         │ injects                          │   http://127.0.0.1:27345
@@ -54,7 +60,17 @@ Unzip the bundle for your ABI into `/data/local/tmp/pixel/` on the phone
 (file manager / Termux / a one-time `adb push` — anything). Check ABI with
 `getprop ro.product.cpu.abi`.
 
-## Run (on the phone, as root)
+## Run
+
+**Recommended — the APK does everything.** Install `pixel-mobile.apk`
+(CI artifact / release, or build `app/` in Android Studio), open it, and grant
+the root (`su`) prompt. `MainActivity` → `Injector.kt` extracts the bundled
+agent + ABI-matched frida-inject to `/data/local/tmp/pixel`, launches/attaches
+MilkChoco, injects, and loads the panel from `http://127.0.0.1:27345`. Nothing
+to push, no `launch.sh`. (The APK carries all four ABIs and picks the match at
+runtime, so one APK works on any device.)
+
+**Manual fallback** (zip bundle), as root:
 
 ```sh
 su
@@ -62,9 +78,8 @@ cd /data/local/tmp/pixel
 sh launch.sh
 ```
 
-It launches/attaches MilkChoco and injects the agent. Open
-**http://127.0.0.1:27345** in the phone browser, or install the WebView app
-(`app/`, build in Android Studio), or "Add to Home screen" (it's a PWA).
+Either way the panel is at **http://127.0.0.1:27345** — also openable in the
+phone browser or "Add to Home screen" (it's a PWA).
 
 > Some ROMs' SELinux blocks ptrace even for root; a ROM-specific permissive
 > tweak may be needed if injection fails.
@@ -83,8 +98,10 @@ mobile/
 ├── web/                    installable PWA panel
 ├── scripts/fetch-frida-inject.cjs
 ├── build.cjs               -> dist/agent.js + dist/pixel-mobile-<abi>.zip
-├── launch.sh               on-device root launcher
-└── app/                    WebView APK project (Android Studio)
+├── launch.sh               on-device root launcher (manual fallback)
+└── app/                    install-and-go WebView APK (auto-injects via root)
+                            app/.../Injector.kt = launch.sh's job, in-app;
+                            build.gradle bundles dist/agent.js + bin/frida-inject-*
 ```
 
 `agent/agent.ts`, `agent/offsets.ts`, `agent/type.d.ts` are copies of the
@@ -109,6 +126,7 @@ Login is bypassed (no web backend on a phone you physically hold).
 Verified by the build: binary pipeline, agent + renderer bundling, and
 generated-script syntax. **Not** verifiable from the build environment and
 needing one real pass: on-device runtime (Frida `Socket`, `frida-inject`
-under root, SELinux) and the APK Gradle build (standard CI recipe, but no
-Android SDK here). Some renderer lifecycle nuances (macro editor persistence,
-finder data) may need device iteration.
+under root, SELinux), the in-app root injection (`Injector.kt` running `su` +
+the `nohup` detach), and the APK Gradle build / asset bundling (standard CI
+recipe, but no Android SDK here). Some renderer lifecycle nuances (macro editor
+persistence, finder data) may need device iteration.
