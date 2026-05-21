@@ -32,3 +32,21 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
 }
+
+// Bundle the injectable agent + every-ABI frida-inject (produced by the parent
+// `npm run build`: dist/agent.js + bin/frida-inject-*) into the APK assets so a
+// single install is self-contained. Injector.kt extracts the ABI match.
+def pixelAssets = file("$projectDir/src/main/assets")
+def pixelAgent = file("$rootDir/../dist/agent.js")
+def pixelBin = file("$rootDir/../bin")
+
+tasks.register('copyPixelAssets', Copy) {
+    doFirst {
+        if (!pixelAgent.exists())
+            throw new GradleException("missing dist/agent.js — run `npm run build` in mobile/ first")
+    }
+    into pixelAssets
+    from(pixelAgent)
+    from(pixelBin) { include 'frida-inject-*' }
+}
+tasks.named('preBuild') { dependsOn 'copyPixelAssets' }

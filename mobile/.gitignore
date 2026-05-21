@@ -2,3 +2,6 @@ node_modules/
 bin/
 build/
 dist/
+
+# bundled into the APK at build time (dist/agent.js + bin/frida-inject-*)
+app/app/src/main/assets/
