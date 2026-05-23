@@ -1,3 +1,42 @@
+// Xigncode bypass. The desktop build runs this as a pre-script (see
+// pixel/src/index.ts start-agent handler) before spawning the game; the
+// standalone mobile bundle attaches AFTER the game is already running, so the
+// same hooks have to live inside the agent itself. Replacing
+// XigncodeClientSystem.initialize neuters the anti-cheat callback (so
+// OnHackDetected can't terminate the process) and getCookie2 still returns
+// the real cookie so the login flow stays intact. Mirrors the bottom of
+// pixel/src/scripts/inj.ts.
+try {
+    Java.perform(() => {
+        try {
+            const callbackClass = Java.use("com.wellbia.xigncode.XigncodeClientSystem$Callback");
+            const FakeCallback = Java.registerClass({
+                name: "com.wellbia.xigncode.FakeCallback",
+                implements: [callbackClass],
+                methods: {
+                    OnHackDetected: function (_code: number, _message: string) {},
+                    OnLog: function (_logMessage: string) {},
+                    SendPacket: function (_data: any) { return 0; }
+                }
+            });
+            const XigncodeClientSystem = Java.use("com.wellbia.xigncode.XigncodeClientSystem");
+            XigncodeClientSystem["initialize"].implementation = function (
+                activity: any, str: string, app: string, str3: string, _callback: any
+            ) {
+                const fakeCallback = FakeCallback.$new();
+                this["initialize"](activity, str, app, str3, fakeCallback);
+                return 0;
+            };
+            XigncodeClientSystem["getCookie2"].implementation = function (str: string) {
+                return this["getCookie2"](str);
+            };
+        } catch (e) {
+            // Class not loaded yet (game still booting) or the game build
+            // doesn't ship Xigncode on this device — either way the rest of
+            // the agent still works.
+        }
+    });
+} catch (e) {}
 "cut";
 // =============================================================================
 //  Offsets, agentSyms and patch values are injected at runtime from the host
@@ -149,6 +188,15 @@ let equip: any = null;
 
 let elec: any = null;
 let mago: any = null;
+
+// Self-buff packet senders used by the `auto-buff` cheat. Each one drops a
+// server-side buff onto the current player; the cheat fires them on a slow
+// interval (300ms) so the periodic packet load stays reasonable.
+let buffOnWheelleg: any = null;
+let createDamageReduction: any = null;
+let createMoveSpeedBuff: any = null;
+let createMaxBarrierBuff: any = null;
+let barrierRecharge: any = null;
 
 // Direct kick via SystemPacketSend::FMatchKickUserSlot. May be null on older
 // libMyGame.so builds that don't export the symbol — every call site guards.
@@ -408,6 +456,11 @@ function init(){
         equip = makeNFunc(agentSyms['buy.equipShort'], 'void', ['uchar', 'uchar', 'uint16']);
         elec = makeNFunc(agentSyms['ingame.buffHitElectric'], 'void', ['pointer', 'uint', 'uint']);
         mago = makeNFunc(agentSyms['ingame.debuffSkillMagoTotem'], 'void', ['uint', 'uint']);
+        buffOnWheelleg = makeNFunc(agentSyms['ingame.buffOnWheelleg'], 'void', ['pointer']);
+        createDamageReduction = makeNFunc(agentSyms['ingame.createDamageReduction'], 'void', ['pointer']);
+        createMoveSpeedBuff = makeNFunc(agentSyms['ingame.createMoveSpeed'], 'void', ['uint', 'uint']);
+        createMaxBarrierBuff = makeNFunc(agentSyms['ingame.createMaxBarrier'], 'void', ['uint', 'uint']);
+        barrierRecharge = makeNFunc(agentSyms['ingame.barrierRecharge'], 'void', ['pointer']);
         fMatchKickUserSlot = makeNFunc(agentSyms['fmatch.kickUserSlot'], 'void', ['uchar']);
         attachNFunc(agentSyms['camera.getCameraUser'], {
             onLeave(retval) {
@@ -776,6 +829,7 @@ function init(){
 
 let toggleDetector = makeNFunc(agentSyms['global.toggleAbuseDetector'], 'void', ['bool']);
 let lastDebuffTime = Date.now();
+let lastAutoBuffTime = Date.now();
 function loop(){
     const delta = Date.now() - lastTime;
     lastTime = Date.now();
@@ -1124,6 +1178,17 @@ function loop(){
                 epos.add(eposOffset['oy']).writeFloat(100);
             } else {
                 epos.add(eposOffset['oy']).writeFloat(0);
+            }
+            if(cheats['auto-buff']){
+                if(Date.now() - lastAutoBuffTime > 300){
+                    const mynum = epos.add(eposOffset['number']).readS32();
+                    if(buffOnWheelleg) try { buffOnWheelleg(epos); } catch(e){}
+                    if(createDamageReduction) try { createDamageReduction(epos); } catch(e){}
+                    if(createMoveSpeedBuff) try { createMoveSpeedBuff(mynum, mynum); } catch(e){}
+                    if(createMaxBarrierBuff) try { createMaxBarrierBuff(mynum, mynum); } catch(e){}
+                    if(barrierRecharge) try { barrierRecharge(epos); } catch(e){}
+                    lastAutoBuffTime = Date.now();
+                }
             }
         } else {
             // lastEpos = false;

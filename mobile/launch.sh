@@ -52,7 +52,23 @@ INJECT="$WORK/frida-inject-$VER-android-$A"
 chmod 755 "$INJECT" 2>/dev/null || true
 
 # --- ensure the game is running, then attach by process name ---
+# Force-stop any existing instance first so the agent attaches as early as
+# possible after launch. The in-agent Xigncode bypass (agent/agent.ts) replaces
+# XigncodeClientSystem.initialize; if the game is already past initialize when
+# we attach, that hook is never triggered and the anti-cheat callback stays
+# live. Pixel desktop avoids this by spawn-paused + bypass + resume; the best
+# we can do with frida-inject is restart cold.
+# Set PIXEL_NO_RESTART=1 to keep an already-running game (Xigncode bypass will
+# be limited).
 PID="$(pidof "$PKG" 2>/dev/null || true)"
+if [ -n "$PID" ] && [ "${PIXEL_NO_RESTART:-0}" != "1" ]; then
+  echo "[pixel] restarting $PKG for clean Xigncode bypass ..."
+  am force-stop "$PKG" >/dev/null 2>&1 || kill -9 "$PID" 2>/dev/null || true
+  i=0
+  while [ -n "$PID" ] && [ $i -lt 10 ]; do
+    sleep 1; i=$((i+1)); PID="$(pidof "$PKG" 2>/dev/null || true)"
+  done
+fi
 if [ -z "$PID" ]; then
   echo "[pixel] launching $PKG ..."
   monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || \

@@ -897,6 +897,12 @@ const lan:{[key:string]:{[key:string]:string}} = {
         'ja':'クッカーバフ',
         'zh':'烹饪器BUFF',
     },
+    'auto-buff':{
+        'en':'Auto Buff',
+        'ko':'자동 버프',
+        'ja':'オートバフ',
+        'zh':'自动BUFF',
+    },
     'changer':{
         'en':'Changer',
         'ko':'체인저',
