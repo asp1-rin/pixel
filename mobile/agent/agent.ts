@@ -189,15 +189,6 @@ let equip: any = null;
 let elec: any = null;
 let mago: any = null;
 
-// Self-buff packet senders used by the `auto-buff` cheat. Each one drops a
-// server-side buff onto the current player; the cheat fires them on a slow
-// interval (300ms) so the periodic packet load stays reasonable.
-let buffOnWheelleg: any = null;
-let createDamageReduction: any = null;
-let createMoveSpeedBuff: any = null;
-let createMaxBarrierBuff: any = null;
-let barrierRecharge: any = null;
-
 // Direct kick via SystemPacketSend::FMatchKickUserSlot. May be null on older
 // libMyGame.so builds that don't export the symbol — every call site guards.
 let fMatchKickUserSlot: any = null;
@@ -456,11 +447,6 @@ function init(){
         equip = makeNFunc(agentSyms['buy.equipShort'], 'void', ['uchar', 'uchar', 'uint16']);
         elec = makeNFunc(agentSyms['ingame.buffHitElectric'], 'void', ['pointer', 'uint', 'uint']);
         mago = makeNFunc(agentSyms['ingame.debuffSkillMagoTotem'], 'void', ['uint', 'uint']);
-        buffOnWheelleg = makeNFunc(agentSyms['ingame.buffOnWheelleg'], 'void', ['pointer']);
-        createDamageReduction = makeNFunc(agentSyms['ingame.createDamageReduction'], 'void', ['pointer']);
-        createMoveSpeedBuff = makeNFunc(agentSyms['ingame.createMoveSpeed'], 'void', ['uint', 'uint']);
-        createMaxBarrierBuff = makeNFunc(agentSyms['ingame.createMaxBarrier'], 'void', ['uint', 'uint']);
-        barrierRecharge = makeNFunc(agentSyms['ingame.barrierRecharge'], 'void', ['pointer']);
         fMatchKickUserSlot = makeNFunc(agentSyms['fmatch.kickUserSlot'], 'void', ['uchar']);
         attachNFunc(agentSyms['camera.getCameraUser'], {
             onLeave(retval) {
@@ -829,7 +815,6 @@ function init(){
 
 let toggleDetector = makeNFunc(agentSyms['global.toggleAbuseDetector'], 'void', ['bool']);
 let lastDebuffTime = Date.now();
-let lastAutoBuffTime = Date.now();
 function loop(){
     const delta = Date.now() - lastTime;
     lastTime = Date.now();
@@ -1179,17 +1164,6 @@ function loop(){
             } else {
                 epos.add(eposOffset['oy']).writeFloat(0);
             }
-            if(cheats['auto-buff']){
-                if(Date.now() - lastAutoBuffTime > 300){
-                    const mynum = epos.add(eposOffset['number']).readS32();
-                    if(buffOnWheelleg) try { buffOnWheelleg(epos); } catch(e){}
-                    if(createDamageReduction) try { createDamageReduction(epos); } catch(e){}
-                    if(createMoveSpeedBuff) try { createMoveSpeedBuff(mynum, mynum); } catch(e){}
-                    if(createMaxBarrierBuff) try { createMaxBarrierBuff(mynum, mynum); } catch(e){}
-                    if(barrierRecharge) try { barrierRecharge(epos); } catch(e){}
-                    lastAutoBuffTime = Date.now();
-                }
-            }
         } else {
             // lastEpos = false;
             // clearAll();
@@ -1324,6 +1298,17 @@ function beNaN(){
     eposPointer.add(eposOffset['z']).writeFloat(NaN);
 }
 
+// Frame-rate independent exponential smoothing for natural follow.
+// dt is in seconds; rate is "per-second response strength". With a fixed
+// rate the camera approaches the target asymptotically — fast at first
+// (large gap) and slowing as it closes in, which is how a human hand
+// tracks a moving target. factor stays in (0, 1) so we never overshoot.
+function aimEaseFactor(speed:number, deltaMs:number):number{
+    const dt = Math.min(0.1, Math.max(0, deltaMs) / 1000);
+    const rate = Math.max(0.01, speed) * 0.3;
+    return 1 - Math.exp(-rate * dt);
+}
+
 function aimbot(eposPointer:NativePointer, delta:number){
     if(!cambase) return;
     if(!eposPointer) return;
@@ -1331,8 +1316,8 @@ function aimbot(eposPointer:NativePointer, delta:number){
     if(eposPointer.isNull()) return;
     if(isDead(eposPointer)) return;
     if(config['aimbot-main-weapon-only'] && eposPointer.add(eposOffset["weapon"]).readS16() == 1) return;
-    const mode = config['aimbot-mode'] || 'normal';
-    const speed = (config['aimbot-speed'] || 20) * (delta/10);
+    const mode = config['aimbot-mode'] || 'smooth';
+    const speed = +config['aimbot-speed'] || 20;
     const angle = config['aimbot-angle'] || 10;
     const ignoreExcept = config['aimbot-ignore'] || false;
     const ignoreTeam = config['aimbot-ignore-team'] || false;
@@ -1374,16 +1359,9 @@ function aimbot(eposPointer:NativePointer, delta:number){
             setYaw(target[0]);
             setPitch(target[1] - pitchOffset);
         } else {
-            const radyaw = target[2] > 0 ? rad : -rad;
-            const radpitch = target[3] > 0 ? rad : -rad;
-            const ry = target[2] > 0 ? Math.max(radyaw, target[2]) : Math.min(radyaw, target[2]);
-            const rp = target[3] > 0 ? Math.max(radpitch, target[3]) : Math.min(radpitch, target[3]);
-            const ry2 = ry - target[2];
-            const rp2 = rp - target[3];
-            const ry3 = target[2] > 0 ? Math.min(target[2], ry2) : Math.max(target[2], ry2);
-            const rp3 = target[3] > 0 ? Math.min(target[3], rp2) : Math.max(target[3], rp2);
-            const nyaw = yaw - (mode === 'smooth' ? ry3 * (speed/100) : target[2] * (speed/100));
-            const npitch = pitch - (mode === 'smooth' ? rp3 * (speed/100) : target[3] * (speed/100));
+            const factor = aimEaseFactor(speed, delta);
+            const nyaw = yaw - target[2] * factor;
+            const npitch = pitch - target[3] * factor;
             setYaw(nyaw);
             setPitch(npitch - pitchOffset);
         }
@@ -1425,16 +1403,9 @@ function aimassist(eposPointer:NativePointer, delta:number){
     }).filter((d:any[]) => d[4] <= rad).sort((a:any[], b:any[]) => a[4] - b[4]);
     const target = targets[0];
     if(target){
-        const radyaw = target[2] > 0 ? rad : -rad;
-        const radpitch = target[3] > 0 ? rad : -rad;
-        const ry = target[2] > 0 ? Math.max(radyaw, target[2]) : Math.min(radyaw, target[2]);
-        const rp = target[3] > 0 ? Math.max(radpitch, target[3]) : Math.min(radpitch, target[3]);
-        const ry2 = ry - target[2];
-        const rp2 = rp - target[3];
-        const ry3 = target[2] > 0 ? Math.min(target[2], ry2) : Math.max(target[2], ry2);
-        const rp3 = target[3] > 0 ? Math.min(target[3], rp2) : Math.max(target[3], rp2);
-        const nyaw = yaw - ry3 * (assistSpeed/100 * (delta/10));
-        const npitch = pitch - rp3 * (assistSpeed/100 * (delta/10));
+        const factor = aimEaseFactor(assistSpeed, delta);
+        const nyaw = yaw - target[2] * factor;
+        const npitch = pitch - target[3] * factor;
         setYaw(nyaw);
         setPitch(npitch - pitchOffset);
     }
@@ -1450,8 +1421,8 @@ function aimbycircle(eposPointer:NativePointer, delta:number){
     const radiusPx = Math.max(0, Math.min(100, Math.round(+config['aim-by-circle-radius'] || 0)));
     const showCircle = config['aim-by-circle-show-circle'] !== false;
     const color = config['aim-by-circle-color'] || '#00ffff';
-    const mode = config['aim-by-circle-mode'] || 'normal';
-    const speed = (+config['aim-by-circle-speed'] || 30) * (delta/10);
+    const mode = config['aim-by-circle-mode'] || 'smooth';
+    const speed = +config['aim-by-circle-speed'] || 30;
     const pitchOffset = +config['aim-by-circle-pitch-offset'] || 0;
     const ignoreExcept = config['aim-by-circle-ignore'] || false;
     const ignoreTeam = config['aim-by-circle-ignore-team'] || false;
@@ -1523,13 +1494,9 @@ function aimbycircle(eposPointer:NativePointer, delta:number){
         setYaw(target.yo);
         setPitch(target.po - pitchOffset);
     } else {
-        const s = speed / 100;
-        const nyaw = mode === 'smooth'
-            ? yaw - target.ya * Math.min(1, s)
-            : yaw - target.ya;
-        const npitch = mode === 'smooth'
-            ? pitch - target.pi * Math.min(1, s)
-            : pitch - target.pi;
+        const factor = aimEaseFactor(speed, delta);
+        const nyaw = yaw - target.ya * factor;
+        const npitch = pitch - target.pi * factor;
         setYaw(nyaw);
         setPitch(npitch - pitchOffset);
     }

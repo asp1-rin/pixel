@@ -144,75 +144,39 @@
                     <input type="text" id="key-aimbot" class="keybind" data-lang-ph="keybind">
                 </main>
                 <main>
-                    <div data-lang="aimbot-mode"></div>
-                    <select class="config" id="aimbot-mode">
-                        <option value="normal" data-lang="normal"></option>
-                        <option value="smooth" data-lang="smooth"></option>
-                        <option value="instant" data-lang="instant"></option>
-                    </select>
+                    <div data-lang="aim-speed"></div>
+                    <input class="config" type="range" id="aimbot-speed" min="1" max="100" value="20">
                 </main>
                 <main>
-                    <div data-lang="aimbot-speed"></div>
-                    <input class="config" type="number" id="aimbot-speed" min="1" max="100" value="20">
+                    <div data-lang="aim-fov"></div>
+                    <input class="config" type="range" id="aimbot-limit" min="1" max="90" value="10">
                 </main>
                 <main>
-                    <div data-lang="aimbot-limit"></div>
-                    <input class="config" type="number" id="aimbot-limit" min="0" max="90" value="3">
+                    <div data-lang="aim-ignore-team"></div>
+                    <input class="config" type="checkbox" id="aimbot-ignore-team" checked>
                 </main>
                 <main>
-                    <div data-lang="aimbot-pitch-offset"></div>
-                    <input class="config" type="number" id="aimbot-pitch-offset" min="-3" max="3" value="0">
-                </main>
-                <main>
-                    <div data-lang="aimbot-acceleration"></div>
-                    <input class="config" type="checkbox" id="aimbot-acceleration">
-                </main>
-                <main>
-                    <div data-lang="aimbot-main-weapon-only"></div>
-                    <input class="config" type="checkbox" id="aimbot-main-weapon-only">
-                </main>
-                <main>
-                    <div data-lang="aimbot-ignore"></div>
-                    <input class="config" type="checkbox" id="aimbot-ignore">
-                </main>
-                <main>
-                    <div data-lang="aimbot-ignore-team"></div>
-                    <input class="config" type="checkbox" id="aimbot-ignore-team">
-                </main>
-                <main>
-                    <div data-lang="aimbot-ignore-death"></div>
-                    <input class="config" type="checkbox" id="aimbot-ignore-death">
+                    <div data-lang="aim-ignore-death"></div>
+                    <input class="config" type="checkbox" id="aimbot-ignore-death" checked>
                 </main>
             </details>
             <details data-cheat="aim-assist">
                 <summary id="aim-assist" data-lang="aim-assist"></summary>
                 <main>
-                    <div data-lang="aim-assist-speed"></div>
-                    <input class="config" type="number" id="aim-assist-speed" min="1" max="100" value="20">
+                    <div data-lang="aim-speed"></div>
+                    <input class="config" type="range" id="aim-assist-speed" min="1" max="100" value="15">
                 </main>
                 <main>
-                    <div data-lang="aim-assist-limit"></div>
-                    <input class="config" type="number" id="aim-assist-limit" min="0" max="90" value="3">
+                    <div data-lang="aim-fov"></div>
+                    <input class="config" type="range" id="aim-assist-limit" min="1" max="90" value="8">
                 </main>
                 <main>
-                    <div data-lang="aim-assist-pitch-offset"></div>
-                    <input class="config" type="number" id="aim-assist-pitch-offset" min="-3" max="3" value="0">
+                    <div data-lang="aim-ignore-team"></div>
+                    <input class="config" type="checkbox" id="aim-assist-ignore-team" checked>
                 </main>
                 <main>
-                    <div data-lang="aim-assist-decay"></div>
-                    <input class="config" type="number" id="aim-assist-decay" min="0" max="1" value="0.1">
-                </main>
-                <main>
-                    <div data-lang="aim-assist-ignore"></div>
-                    <input class="config" type="checkbox" id="aim-assist-ignore">
-                </main>
-                <main>
-                    <div data-lang="aim-assist-ignore-team"></div>
-                    <input class="config" type="checkbox" id="aim-assist-ignore-team">
-                </main>
-                <main>
-                    <div data-lang="aim-assist-ignore-death"></div>
-                    <input class="config" type="checkbox" id="aim-assist-ignore-death">
+                    <div data-lang="aim-ignore-death"></div>
+                    <input class="config" type="checkbox" id="aim-assist-ignore-death" checked>
                 </main>
             </details>
             <details data-cheat="aim-by-circle">
@@ -223,23 +187,11 @@
                 </main>
                 <main>
                     <div data-lang="aim-by-circle-radius"></div>
-                    <input class="config" type="number" id="aim-by-circle-radius" min="0" max="100" step="1" value="50">
+                    <input class="config" type="range" id="aim-by-circle-radius" min="5" max="100" step="1" value="40">
                 </main>
                 <main>
-                    <div data-lang="aim-by-circle-mode"></div>
-                    <select class="config" id="aim-by-circle-mode">
-                        <option value="normal" data-lang="normal"></option>
-                        <option value="smooth" data-lang="smooth"></option>
-                        <option value="instant" data-lang="instant"></option>
-                    </select>
-                </main>
-                <main>
-                    <div data-lang="aim-by-circle-speed"></div>
-                    <input class="config" type="number" id="aim-by-circle-speed" min="1" max="100" value="30">
-                </main>
-                <main>
-                    <div data-lang="aim-by-circle-pitch-offset"></div>
-                    <input class="config" type="number" id="aim-by-circle-pitch-offset" min="-3" max="3" step="0.01" value="0">
+                    <div data-lang="aim-speed"></div>
+                    <input class="config" type="range" id="aim-by-circle-speed" min="1" max="100" value="25">
                 </main>
                 <main>
                     <div data-lang="aim-by-circle-show-circle"></div>
@@ -250,20 +202,12 @@
                     <input class="config" type="color" id="aim-by-circle-color" value="#00ffff">
                 </main>
                 <main>
-                    <div data-lang="aim-by-circle-wallcheck"></div>
-                    <input class="config" type="checkbox" id="aim-by-circle-wallcheck">
+                    <div data-lang="aim-ignore-team"></div>
+                    <input class="config" type="checkbox" id="aim-by-circle-ignore-team" checked>
                 </main>
                 <main>
-                    <div data-lang="aim-by-circle-ignore"></div>
-                    <input class="config" type="checkbox" id="aim-by-circle-ignore">
-                </main>
-                <main>
-                    <div data-lang="aim-by-circle-ignore-team"></div>
-                    <input class="config" type="checkbox" id="aim-by-circle-ignore-team">
-                </main>
-                <main>
-                    <div data-lang="aim-by-circle-ignore-death"></div>
-                    <input class="config" type="checkbox" id="aim-by-circle-ignore-death">
+                    <div data-lang="aim-ignore-death"></div>
+                    <input class="config" type="checkbox" id="aim-by-circle-ignore-death" checked>
                 </main>
             </details>
             <!-- <details data-cheat="autoswap">
@@ -301,414 +245,26 @@
                     <button id="listen-main" data-lang="autoswap-mainweapon-listen" class="attached" disabled></button>
                 </main>
             </details> -->
-            <details data-cheat="esp">
-                <summary id="esp" data-lang="esp"></summary>
-                <main>
-                    <div data-lang="esp-tracer"></div>
-                    <input class="config" type="checkbox" id="esp-tracer">
-                </main>
-                <main>
-                    <div data-lang="esp-3d"></div>
-                    <input class="config" type="checkbox" id="esp-3d">
-                </main>
-                <main>
-                    <div data-lang="esp-font-size"></div>
-                    <input class="config" type="number" id="esp-font-size" min="1" max="100" value="16">
-                </main>
-                <main>
-                    <div data-lang="esp-tag"></div>
-                    <input class="config" type="checkbox" id="esp-tag">
-                </main>
-                <main>
-                    <div data-lang="esp-tag-type"></div>
-                    <select class="config" id="esp-tag-type">
-                        <option value="both" data-lang="both"></option>
-                        <option value="number" data-lang="number"></option>
-                        <option value="nickname" data-lang="nickname"></option>
-                    </select>
-                </main>
-                <main>
-                    <div data-lang="esp-bar"></div>
-                    <input class="config" type="checkbox" id="esp-bar">
-                </main>
-                <main>
-                    <div data-lang="esp-color"></div>
-                    <input class="config" type="color" id="esp-color" value="#ff0000">
-                </main>
-                <main>
-                    <div data-lang="esp-team-color"></div>
-                    <input class="config" type="color" id="esp-team-color" value="#0000ff">
-                </main>
-                <main>
-                    <div data-lang="esp-mark-color"></div>
-                    <input class="config" type="color" id="esp-mark-color" value="#ffff00">
-                </main>
-                <main>
-                    <div data-lang="esp-dead-color"></div>
-                    <input class="config" type="color" id="esp-dead-color" value="#aaaaaa">
-                </main>
-                <main>
-                    <div data-lang="esp-pitch-offset"></div>
-                    <input class="config" type="number" id="esp-pitch-offset" min="-3" max="3" value="0">
-                </main>
-                <main>
-                    <div data-lang="esp-mark-keybind"></div>
-                    <input type="text" id="key-esp-mark" class="keybind" data-lang-ph="keybind">
-                </main>
-            </details>
-            <details data-cheat="blackhole">
-                <summary id="blackhole" data-lang="blackhole"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-blackhole" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="blackhole-target"></div>
-                    <select class="config" id="blackhole-target">
-                        <option value="crosshair" data-lang="crosshair"></option>
-                        <option value="position" data-lang="position"></option>
-                    </select>
-                </main>
-                <main>
-                    <div data-lang="blackhole-distance"></div>
-                    <input class="config" type="number" id="blackhole-distance" min="1" max="100" value="20">
-                </main>
-                <main>
-                    <div data-lang="blackhole-position"></div>
-                </main>
-                <main>
-                    <input class="config w-full text-center" type="number" id="blackhole-x" value="0" min="-9999" max="9999">
-                    <input class="config w-full text-center" type="number" id="blackhole-y" value="0" min="-9999" max="9999">
-                    <input class="config w-full text-center" type="number" id="blackhole-z" value="0" min="-9999" max="9999">
-                </main>
-                <main>
-                    <div data-lang="blackhole-ignore"></div>
-                    <input class="config" type="checkbox" id="blackhole-ignore">
-                </main>
-                <main>
-                    <div data-lang="blackhole-ignore-team"></div>
-                    <input class="config" type="checkbox" id="blackhole-ignore-team">
-                </main>
-                <main>
-                    <div data-lang="blackhole-ignore-death"></div>
-                    <input class="config" type="checkbox" id="blackhole-ignore-death">
-                </main>
-                <main>
-                    <div data-lang="blackhole-prevent-lagger"></div>
-                    <input class="config" type="checkbox" id="blackhole-prevent-lagger">
-                </main>
-                <main>
-                    <div data-lang="blackhole-force-drop"></div>
-                    <input class="config" type="checkbox" id="blackhole-force-drop">
-                </main>
-            </details>
-            <details data-cheat="shoot-speed">
-                <summary id="shoot-speed" data-lang="shoot-speed"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-shoot-speed" class="keybind" data-lang-ph="keybind">
-                </main>
-            </details>
+            <!-- Hidden: ESP / blackhole / shoot-speed and all non-aim cheats.
+                 Pixel keeps the aim panel minimal per user request — only
+                 aimbot / aim-assist / aim-by-circle / no-recoil / no-spread
+                 are exposed. Agent-side code for the hidden cheats is kept
+                 intact so saved configs and existing keybinds still work
+                 once a future build re-enables them in the panel. -->
             <details data-cheat="no-recoil">
                 <summary class="no" id="no-recoil" data-lang="no-recoil"></summary>
             </details>
             <details data-cheat="no-spread">
                 <summary class="no" id="no-spread" data-lang="no-spread"></summary>
             </details>
-            <details data-cheat="infinite-ammo">
-                <summary class="no" id="infinite-ammo" data-lang="infinite-ammo"></summary>
-            </details>
-            <details data-cheat="no-reload">
-                <summary class="no" id="no-reload" data-lang="no-reload"></summary>
-            </details>
-            <details data-cheat="no-timer">
-                <summary id="no-timer" data-lang="no-timer"></summary>
-                <main>
-                    <div data-lang="no-timer-reload"></div>
-                    <input class="config" type="checkbox" id="no-timer-reload">
-                </main>
-                <main>
-                    <div data-lang="no-timer-grenade"></div>
-                    <input class="config" type="checkbox" id="no-timer-grenade">
-                </main>
-                <main>
-                    <div data-lang="no-timer-respawn"></div>
-                    <input class="config" type="checkbox" id="no-timer-respawn">
-                </main>
-            </details>
-            <details data-cheat="instant-respawn">
-                <summary class="no" id="instant-respawn" data-lang="instant-respawn"></summary>
-            </details>
-            <details data-cheat="no-clip">
-                <summary class="no" id="no-clip" data-lang="no-clip"></summary>
-            </details>
-            <details data-cheat="fly">
-                <summary id="fly" data-lang="fly"></summary>
-                <main>
-                    <div data-lang="fly-up-keybind"></div>
-                    <input type="text" id="key-fly-up" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="fly-down-keybind"></div>
-                    <input type="text" id="key-fly-down" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="fly-speed"></div>
-                    <input class="config" type="number" id="fly-speed" min="0" max="100" value="4">
-                </main>
-            </details>
-            <details data-cheat="move-speed">
-                <summary id="move-speed" data-lang="move-speed"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-move-speed" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="move-speed-value"></div>
-                    <input class="config" type="number" id="move-speed-value" min="0.1" max="100" value="3">
-                </main>
-            </details>
-            <details data-cheat="infinite-jump">
-                <summary id="infinite-jump" data-lang="infinite-jump"></summary>
-                <main>
-                    <div data-lang="infinite-jump-keybind"></div>
-                    <input type="text" id="key-infinite-jump" class="keybind" data-lang-ph="keybind">
-                </main>
-            </details>
-            <details data-cheat="upskill">
-                <summary id="upskill" data-lang="upskill"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-upskill" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="upskill-only-once"></div>
-                    <input class="config" type="checkbox" id="upskill-only-once">
-                </main>
-                <!-- <main>
-                    <div data-lang="upskill-value"></div>
-                    <input class="config" type="number" id="upskill-value" min="0" max="9999" value="9999">
-                </main> -->
-            </details>
-            <details data-cheat="grenade">
-                <summary id="grenade" data-lang="grenade"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-grenade" class="keybind" data-lang-ph="keybind">
-                </main>
-            </details>
-            <details data-cheat="anti-hook">
-                <summary class="no" id="anti-hook" data-lang="anti-hook"></summary>
-            </details>
-            <details data-cheat="kicker">
-                <summary id="kicker" data-lang="kicker"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-kicker" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="auto-kick"></div>
-                    <input class="config" type="checkbox" id="auto-kick">
-                </main>
-                <main>
-                    <div data-lang="auto-kick-ignore"></div>
-                    <input class="config" type="checkbox" id="auto-kick-ignore">
-                </main>
-                <main>
-                    <input type="text" id="kick-player-number" class="w-full text-center" data-lang-ph="user-id">
-                    <button class="w-full" id="kick-player" data-lang="kick"></button>
-                </main>
-            </details>
-            <details>
-                <summary data-lang="slot-kicker"></summary>
-                <main>
-                    <button class="w-full" id="kick-slot-0">1</button>
-                    <button class="w-full" id="kick-slot-1">2</button>
-                    <button class="w-full" id="kick-slot-2">3</button>
-                    <button class="w-full" id="kick-slot-3">4</button>
-                    <button class="w-full" id="kick-slot-4">5</button>
-                </main>
-                <main>
-                    <button class="w-full" id="kick-slot-5">6</button>
-                    <button class="w-full" id="kick-slot-6">7</button>
-                    <button class="w-full" id="kick-slot-7">8</button>
-                    <button class="w-full" id="kick-slot-8">9</button>
-                    <button class="w-full" id="kick-slot-9">10</button>
-                </main>
-                <main>
-                    <button class="w-full" id="kick-all-enemy" data-lang="kick-all-enemy"></button>
-                </main>
-                <main>
-                    <input type="number" id="kick-loop-slot" class="w-full text-center" min="1" max="10" value="1" data-lang-ph="slot">
-                    <input type="number" id="kick-loop-interval" class="w-full text-center" min="50" max="5000" value="200" data-lang-ph="interval-ms">
-                </main>
-                <main>
-                    <button class="w-full" id="kick-loop-start" data-lang="kick-loop-start"></button>
-                    <button class="w-full" id="kick-loop-stop" data-lang="kick-loop-stop"></button>
-                </main>
-            </details>
-            <!-- <details>
-                <summary id="freecam" data-lang="freecam"></summary>
-                <main>
-                    <div data-lang="freecam-cam-speed"></div>
-                    <input class="config" type="number" id="freecam-cam-speed" min="0" max="100" value="0.05">
-                </main>
-                <main>
-                    <div data-lang="freecam-move-speed"></div>
-                    <input class="config" type="number" id="freecam-move-speed" min="0" max="100" value="2">
-                </main>
-            </details> -->
-            <details data-cheat="one-kill">
-                <summary class="no" id="one-kill" data-lang="one-kill"></summary>
-            </details>
-            <details data-cheat="skill-damage">
-                <summary class="no" id="skill-damage" data-lang="skill-damage"></summary>
-            </details>
-            <details data-cheat="debuff">
-                <summary id="debuff" data-lang="debuff"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-debuff" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <div data-lang="debuff-interval"></div>
-                    <input type="number" id="debuff-interval" class="config" min="0" max="10" value="0.1">
-                </main>
-                <main>
-                    <div data-lang="debuff-ignore"></div>
-                    <input class="config" type="checkbox" id="debuff-ignore">
-                </main>
-                <main>
-                    <div data-lang="debuff-electric"></div>
-                    <input class="config" type="checkbox" id="debuff-electric">
-                </main>
-                <main>
-                    <div data-lang="debuff-mago"></div>
-                    <input class="config" type="checkbox" id="debuff-mago">
-                </main>
-            </details>
-            <details data-cheat="electric">
-                <summary id="electric" data-lang="electric"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-electric" class="keybind" data-lang-ph="keybind">
-                </main>
-            </details>
-            <details data-cheat="mago">
-                <summary id="mago" data-lang="mago"></summary>
-                <main>
-                    <div data-lang="keybind"></div>
-                    <input type="text" id="key-mago" class="keybind" data-lang-ph="keybind">
-                </main>
-            </details>
-            <details data-cheat="hide-me">
-                <summary class="no" id="hide-me" data-lang="hide-me"></summary>
-            </details>
-            <details data-cheat="cooker-buff">
-                <summary class="no" id="cooker-buff" data-lang="cooker-buff"></summary>
-            </details>
-            <details data-cheat="auto-buff">
-                <summary class="no" id="auto-buff" data-lang="auto-buff"></summary>
-            </details>
-            <details data-cheat="changer">
-                <summary data-lang="changer"></summary>
-                <main>
-                    <input class="w-full text-center" type="text" id="pos-x" placeholder="X">
-                    <input class="w-full text-center" type="text" id="pos-y" placeholder="Y">
-                    <input class="w-full text-center" type="text" id="pos-z" placeholder="Z">
-                    <button class="w-full" id="pos-reverse" data-lang="reverse"></button>
-                </main>
-                <main>
-                    <div data-lang="reverse-keybind"></div>
-                    <input type="text" id="key-reverse" class="keybind" data-lang-ph="keybind">
-                </main>
-                <main>
-                    <input class="w-full text-center" type="text" id="skillcode" data-lang-ph="skillcode">
-                </main>
-                <!-- <main>
-                    <input class="w-full text-center" type="text" id="state-act" data-lang-ph="state-act">
-                </main> -->
-                <button class="w-full" id="change-NaN" data-lang="change-NaN"></button>
-                <button class="w-full" id="change-ads-reward" data-lang="change-ads-reward"></button>
-            </details>
-            <details data-cheat="resource-hack">
-                <summary data-lang="resource-hack"></summary>
-                <main>
-                    <input type="text" id="unlock-all-item-char-id" class="w-full text-center" data-lang-ph="char-id">
-                    <button class="w-full" id="unlock-all-item" data-lang="unlock-all-item"></button>
-                </main>
-                <main>
-                    <button class="w-full" id="unlock-all-char" data-lang="unlock-all-char"></button>
-                </main>
-                <main>
-                    <input type="text" id="get-daily-reward-repeat" class="w-full text-center" data-lang-ph="repeat-count">
-                    <button class="w-full" id="get-daily-reward" data-lang="get-daily-reward"></button>
-                </main>
-            </details>
-            <details data-cheat="utilities">
-                <summary data-lang="utilities"></summary>
-                <main>
-                    <input type="text" id="nickname-value" class="w-full text-center" data-lang-ph="nickname">
-                    <button class="w-full" id="change-nickname" data-lang="change"></button>
-                </main>
-                <main>
-                    <input type="text" id="purchase-player-number" class="w-full text-center" data-lang-ph="user-id">
-                    <select name="purchase-item" id="purchase-item" value="0">
-                        <option value="1" data-lang="vip-pass"></option>
-                        <option value="2" data-lang="hero-pass"></option>
-                    </select>
-                    <button class="w-full" id="purchase-pass" data-lang="purchase"></button>
-                </main>
-                <main>
-                    <input type="text" id="clanname-value" class="w-full text-center" data-lang-ph="clanname">
-                    <button class="w-full" id="create-clan" data-lang="create"></button>
-                </main>
-                <main>
-                    <button class="w-full" id="break-clan" data-lang="break-clan"></button>
-                </main>
-                <main>
-                    <input type="text" id="buy-clan-gold-repeat" class="w-full text-center" data-lang-ph="repeat-count">
-                    <button class="w-full" id="buy-clan-gold" data-lang="buy-clan-gold"></button>
-                </main>
-                <main>
-                    <input type="text" id="equip-char-number" class="w-full text-center" data-lang-ph="char-id">
-                    <button class="w-full" id="equip-spyra" data-lang="equip-spyra"></button>
-                    <button class="w-full" id="equip-mh9" data-lang="equip-mh9"></button>
-                </main>
-                <!-- <main>
-                    <button class="w-full" id="server-exploit" data-lang="server-exploit"></button>
-                </main> -->
-            </details>
-            <details data-cheat="teleport">
-                <summary data-lang="teleport"></summary>
-                <main>
-                    <div data-lang="map"></div>
-                    <select id="teleport-map">
-                        <option value="1" data-lang="ctm-default"></option>
-                        <option value="2" data-lang="ctm-desert"></option>
-                        <option value="3" data-lang="ctm-castle"></option>
-                        <option value="4" data-lang="ctm-mountain"></option>
-                    </select>
-                </main>
-                <div class="w-full" data-lang="milk"></div>
-                <main>
-                    <button class="w-full teleport-btn" data-side="milk" data-index="0">1</button>
-                    <button class="w-full teleport-btn" data-side="milk" data-index="1">2</button>
-                    <button class="w-full teleport-btn" data-side="milk" data-index="2">3</button>
-                    <button class="w-full teleport-btn" data-side="milk" data-index="3">4</button>
-                </main>
-                <div class="w-full" data-lang="choco"></div>
-                <main>
-                    <button class="w-full teleport-btn" data-side="choco" data-index="0">1</button>
-                    <button class="w-full teleport-btn" data-side="choco" data-index="1">2</button>
-                    <button class="w-full teleport-btn" data-side="choco" data-index="2">3</button>
-                    <button class="w-full teleport-btn" data-side="choco" data-index="3">4</button>
-                </main>
-            </details>
-            <details>
-                <summary data-lang="macro"></summary>
-                <div id="macro-list"></div>
-            </details>
+            <!-- All non-aim cheats removed from the panel per user request:
+                 ESP, blackhole, shoot-speed, infinite-ammo, no-reload, no-timer,
+                 instant-respawn, no-clip, fly, move-speed, infinite-jump, upskill,
+                 grenade, anti-hook, kicker (incl. slot kicker), one-kill,
+                 skill-damage, debuff, electric, mago, hide-me, cooker-buff,
+                 changer, resource-hack, utilities, teleport, macros.
+                 Agent-side handlers are intact, so saved configs and keybinds
+                 still work when a future build re-enables them. -->
         </section>
         <section id="macros" class="hide">
             <input type="text" data-lang-ph="search" id="search-macro" class="w-full">
