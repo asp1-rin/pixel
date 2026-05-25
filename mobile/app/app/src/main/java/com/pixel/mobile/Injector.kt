@@ -61,17 +61,11 @@ object Injector {
             chmod 755 "${s}WORK/frida-inject" 2>/dev/null || true
             if pidof frida-inject >/dev/null 2>&1; then echo PIXEL_ALREADY; exit 0; fi
             PID=${s}(pidof "${s}PKG" 2>/dev/null || true)
-            # Restart the game cold so the in-agent Xigncode hook
-            # (XigncodeClientSystem.initialize replacement) catches the very
-            # first initialize call. frida-inject can't spawn-paused like the
-            # desktop build, so a cold start is the next best thing.
-            if [ -n "${s}PID" ]; then
-              am force-stop "${s}PKG" >/dev/null 2>&1 || kill -9 "${s}PID" 2>/dev/null || true
-              i=0
-              while [ -n "${s}PID" ] && [ ${s}i -lt 10 ]; do
-                sleep 1; i=${s}((i+1)); PID=${s}(pidof "${s}PKG" 2>/dev/null || true)
-              done
-            fi
+            # Attach without killing — force-stopping closes the user's
+            # current MilkChoco session for marginal Xigncode-bypass gain
+            # (the in-agent hook still neuters future initialize / getCookie2
+            # calls). If the game isn't running yet we launch it; otherwise
+            # we attach to the existing PID.
             if [ -z "${s}PID" ]; then
               monkey -p "${s}PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || \
                 am start -n "${s}PKG/com.unity3d.player.UnityPlayerActivity" >/dev/null 2>&1 || true

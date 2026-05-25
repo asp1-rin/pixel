@@ -257,14 +257,83 @@
             <details data-cheat="no-spread">
                 <summary class="no" id="no-spread" data-lang="no-spread"></summary>
             </details>
-            <!-- All non-aim cheats removed from the panel per user request:
-                 ESP, blackhole, shoot-speed, infinite-ammo, no-reload, no-timer,
-                 instant-respawn, no-clip, fly, move-speed, infinite-jump, upskill,
-                 grenade, anti-hook, kicker (incl. slot kicker), one-kill,
-                 skill-damage, debuff, electric, mago, hide-me, cooker-buff,
-                 changer, resource-hack, utilities, teleport, macros.
-                 Agent-side handlers are intact, so saved configs and keybinds
-                 still work when a future build re-enables them. -->
+            <details data-cheat="kicker">
+                <summary id="kicker" data-lang="kicker"></summary>
+                <main>
+                    <div data-lang="keybind"></div>
+                    <input type="text" id="key-kicker" class="keybind" data-lang-ph="keybind">
+                </main>
+                <main>
+                    <div data-lang="auto-kick"></div>
+                    <input class="config" type="checkbox" id="auto-kick">
+                </main>
+                <main>
+                    <div data-lang="auto-kick-ignore"></div>
+                    <input class="config" type="checkbox" id="auto-kick-ignore">
+                </main>
+                <main>
+                    <input type="text" id="kick-player-number" class="w-full text-center" data-lang-ph="user-id">
+                    <button class="w-full" id="kick-player" data-lang="kick"></button>
+                </main>
+            </details>
+            <details>
+                <summary data-lang="slot-kicker"></summary>
+                <main>
+                    <button class="w-full" id="kick-slot-0">1</button>
+                    <button class="w-full" id="kick-slot-1">2</button>
+                    <button class="w-full" id="kick-slot-2">3</button>
+                    <button class="w-full" id="kick-slot-3">4</button>
+                    <button class="w-full" id="kick-slot-4">5</button>
+                </main>
+                <main>
+                    <button class="w-full" id="kick-slot-5">6</button>
+                    <button class="w-full" id="kick-slot-6">7</button>
+                    <button class="w-full" id="kick-slot-7">8</button>
+                    <button class="w-full" id="kick-slot-8">9</button>
+                    <button class="w-full" id="kick-slot-9">10</button>
+                </main>
+                <main>
+                    <button class="w-full" id="kick-all-enemy" data-lang="kick-all-enemy"></button>
+                </main>
+                <main>
+                    <input type="number" id="kick-loop-slot" class="w-full text-center" min="1" max="10" value="1" data-lang-ph="slot">
+                    <input type="number" id="kick-loop-interval" class="w-full text-center" min="50" max="5000" value="200" data-lang-ph="interval-ms">
+                </main>
+                <main>
+                    <button class="w-full" id="kick-loop-start" data-lang="kick-loop-start"></button>
+                    <button class="w-full" id="kick-loop-stop" data-lang="kick-loop-stop"></button>
+                </main>
+            </details>
+            <details data-cheat="teleport">
+                <summary data-lang="teleport"></summary>
+                <main>
+                    <div data-lang="map"></div>
+                    <select id="teleport-map">
+                        <option value="1" data-lang="ctm-default"></option>
+                        <option value="2" data-lang="ctm-desert"></option>
+                        <option value="3" data-lang="ctm-castle"></option>
+                        <option value="4" data-lang="ctm-mountain"></option>
+                    </select>
+                </main>
+                <div class="w-full" data-lang="milk"></div>
+                <main>
+                    <button class="w-full teleport-btn" data-side="milk" data-index="0">1</button>
+                    <button class="w-full teleport-btn" data-side="milk" data-index="1">2</button>
+                    <button class="w-full teleport-btn" data-side="milk" data-index="2">3</button>
+                    <button class="w-full teleport-btn" data-side="milk" data-index="3">4</button>
+                </main>
+                <div class="w-full" data-lang="choco"></div>
+                <main>
+                    <button class="w-full teleport-btn" data-side="choco" data-index="0">1</button>
+                    <button class="w-full teleport-btn" data-side="choco" data-index="1">2</button>
+                    <button class="w-full teleport-btn" data-side="choco" data-index="2">3</button>
+                    <button class="w-full teleport-btn" data-side="choco" data-index="3">4</button>
+                </main>
+            </details>
+            <!-- Remaining non-aim cheats stay hidden (ESP, blackhole, fly,
+                 changer, utilities, etc.). Agent-side handlers are intact, so
+                 saved configs and keybinds still work when a future build
+                 re-enables them in the panel. -->
         </section>
         <section id="macros" class="hide">
             <input type="text" data-lang-ph="search" id="search-macro" class="w-full">
