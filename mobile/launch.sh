@@ -79,4 +79,19 @@ fi
 
 echo "[pixel] injecting into $PKG (pid $PID, abi $A)"
 echo "[pixel] panel will be at http://127.0.0.1:27345  (Ctrl+C to detach)"
-exec "$INJECT" -n "$PKG" -s "$AGENT" --runtime=qjs
+# --realm=emulated runs the agent inside Frida's Stalker-based emulator so its
+# JS context is invisible to Xigncode's anti-Frida scans. Every API the agent
+# uses (Java.perform, Module.findExportByName, NativeFunction, Interceptor,
+# Memory.protect/alloc, Socket.listen, setInterval) works in both realms, so
+# this is purely a defensive upgrade. Older frida-inject builds may not know
+# the flag — we probe --help and drop it silently if so. Set
+# PIXEL_REALM=native to force native realm.
+REALM="${PIXEL_REALM:-emulated}"
+REALM_OPT=""
+if "$INJECT" --help 2>&1 | grep -q -- "--realm"; then
+  REALM_OPT="--realm=$REALM"
+  echo "[pixel] frida realm: $REALM"
+else
+  echo "[pixel] frida realm: native (this frida-inject build has no --realm flag)"
+fi
+exec "$INJECT" -n "$PKG" -s "$AGENT" --runtime=qjs $REALM_OPT

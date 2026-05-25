@@ -75,7 +75,18 @@ object Injector {
               done
             fi
             [ -n "${s}PID" ] || { echo PIXEL_NOGAME; exit 0; }
-            nohup "${s}WORK/frida-inject" -n "${s}PKG" -s "${s}WORK/agent.js" --runtime=qjs \
+            # --realm=emulated runs the agent inside Frida's Stalker-based
+            # emulator so its JS context is invisible to Xigncode's
+            # anti-Frida scans. Every API the agent uses works in both
+            # realms (audited line-by-line), so this is purely defensive.
+            # Older frida-inject builds may not know --realm; probe --help
+            # and drop the flag if so.
+            REALM_OPT=""
+            if "${s}WORK/frida-inject" --help 2>&1 | grep -q -- "--realm"; then
+              REALM_OPT="--realm=emulated"
+            fi
+            nohup "${s}WORK/frida-inject" -n "${s}PKG" -s "${s}WORK/agent.js" \
+              --runtime=qjs ${s}REALM_OPT \
               >"${s}WORK/inject.log" 2>&1 &
             echo PIXEL_INJECTED
         """.trimIndent()
